@@ -523,9 +523,33 @@ async function saveDrive(data){
 async function loadDrive(){
   try{
     const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${DFILE}' and trashed=false&spaces=appDataFolder`,{headers:{Authorization:`Bearer ${aToken}`}});
+    if(!r.ok){
+      // Token likely expired — fall back to local, clear bad token
+      localStorage.removeItem('ks_at');driveOn=false;updateDriveUI(false);
+      renderClients();renderStatsBar();return;
+    }
     const d=await r.json();
-    if(d.files&&d.files.length){driveFileId=d.files[0].id;const fr=await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,{headers:{Authorization:`Bearer ${aToken}`}});const fd=await fr.json();clients=fd.clients||[];}
-  }catch(e){}
+    if(d.files&&d.files.length){
+      driveFileId=d.files[0].id;
+      const fr=await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,{headers:{Authorization:`Bearer ${aToken}`}});
+      const fd=await fr.json();
+      // Only replace local data if Drive has more clients (prevents wipe)
+      const driveClients=fd.clients||[];
+      if(driveClients.length>=clients.length){
+        clients=driveClients;
+        localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
+      } else {
+        // Local has more data — push local up to Drive to sync
+        saveDrive(JSON.stringify({clients,v:3}));
+      }
+    } else {
+      // No file in Drive yet — push local data up
+      saveDrive(JSON.stringify({clients,v:3}));
+    }
+  }catch(e){
+    // Any error — just use local data, don't wipe it
+    driveOn=false;updateDriveUI(false);
+  }
   renderClients();renderStatsBar();
 }
 
@@ -1077,4 +1101,3 @@ function toast(m,t='s'){const x=document.getElementById('toast');x.textContent=m
 </script>
 </body>
 </html>
-
