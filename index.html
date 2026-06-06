@@ -176,7 +176,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
   <div class="logo">Keystone <span>Setters</span></div>
   <div class="hdr-r">
     <span class="sync-status" id="syncStatus"></span>
-    <button class="hbtn on" id="syncBtn" onclick="manualSync()"><span class="dot" style="background:var(--gr);box-shadow:0 0 5px var(--gr);"></span><span id="syncLbl">GitHub Sync</span></button>
+    <button class="hbtn" id="syncBtn" onclick="manualSync()"><span class="dot" id="syncDot"></span><span id="syncLbl">Connect Drive</span></button>
     <button class="hbtn" id="sBtn" onclick="openStripeModal()">⚡ <span id="sLbl">Stripe</span></button>
     <button class="btn btn-or" style="font-size:11px;" onclick="openAdd()">+ Add Client</button>
   </div>
@@ -250,6 +250,23 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
   </div>
 </main>
 <div class="toast" id="toast"></div>
+
+<!-- DRIVE MODAL -->
+<div class="mo" id="moSync">
+  <div class="md" style="max-width:380px;">
+    <button class="md-x" onclick="closeMo('moSync')">✕</button>
+    <div style="text-align:center;padding:8px 0;">
+      <div style="font-size:42px;margin-bottom:12px;">☁️</div>
+      <div style="font-size:16px;font-weight:800;margin-bottom:6px;">Connect Google Drive</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px;">Sign in once — data syncs across every browser and device automatically.</div>
+      <button style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;background:#fff;color:#333;border:none;border-radius:var(--r2);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin:0 auto 10px;width:100%;max-width:260px;" onclick="signInGoogle()">
+        <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        Sign in with Google
+      </button>
+      <button style="display:block;width:100%;max-width:260px;margin:0 auto;padding:8px;background:transparent;border:1px solid var(--b1);border-radius:var(--r2);color:var(--t3);font-family:'Syne',sans-serif;font-size:11px;cursor:pointer;" onclick="useLocal()">Use local storage only</button>
+    </div>
+  </div>
+</div>
 
 <!-- STRIPE MODAL -->
 <div class="mo" id="moStripe">
@@ -349,13 +366,11 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 <script>
 let clients=[],editId=null,curContract='ppa',curFilter='all';
 let stripeKey=null,expandedIds=new Set();
-let syncTimeout=null,lastSyncTime=0;
+let syncTimeout=null;
 
-// GitHub config — data saved as JSON file in your repo
-const GH_TOKEN='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';
-const GH_REPO='keystonescaling/keystone-data';
-const GH_FILE='ks-data.json';
-const GH_API=`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+const GCL='234293704596-h0cvhdl9nffm335bamnlk7251b1dtcbi.apps.googleusercontent.com';
+const DFILE='ks-setters-v2.json';
+let driveOn=false,driveFileId=null,aToken=null;
 
 window.addEventListener('load',()=>{
   stripeKey=localStorage.getItem('ks_sk')||null;
@@ -371,72 +386,120 @@ function switchTab(t,el){
   if(t==='stats')renderStats();
 }
 
-// ── GITHUB SYNC ────────────────────────────────────────────────────────────────
-async function loadData(){
-  setSyncStatus('Syncing...','var(--am)');
-  // Load local first for instant display
-  try{const raw=localStorage.getItem('ks_d');if(raw){const p=JSON.parse(raw);clients=p.clients||[];}}catch(e){clients=[];}
-  renderClients();renderStatsBar();
-  // Then fetch from GitHub
-  try{
-    const r=await fetch(GH_API,{headers:{Authorization:`token ${GH_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
-    if(r.ok){
-      const d=await r.json();
-      const content=JSON.parse(atob(d.content.replace(/\n/g,'')));
-      const ghClients=content.clients||[];
-      // Use whichever has more data
-      if(ghClients.length>=clients.length){
-        clients=ghClients;
-        localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
-        renderClients();renderStatsBar();
-      }else if(clients.length>ghClients.length){
-        // Local has more — push up
-        await pushToGitHub();
-      }
-      setSyncStatus('Synced ✓','var(--gr)');
-    }else if(r.status===404){
-      // File doesn't exist yet — create it
-      await pushToGitHub();
-      setSyncStatus('Synced ✓','var(--gr)');
-    }else{
-      setSyncStatus('Sync error','var(--re)');
-    }
-  }catch(e){setSyncStatus('Offline — local only','var(--t3)');}
-}
-
-async function pushToGitHub(){
-  try{
-    const data=JSON.stringify({clients,v:3,updated:new Date().toISOString()});
-    const encoded=btoa(unescape(encodeURIComponent(data)));
-    // Get current SHA if file exists
-    let sha=null;
-    try{const r=await fetch(GH_API,{headers:{Authorization:`token ${GH_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});if(r.ok){const d=await r.json();sha=d.sha;}}catch(e){}
-    const body={message:'Update client data',content:encoded};
-    if(sha)body.sha=sha;
-    const r=await fetch(GH_API,{method:'PUT',headers:{Authorization:`token ${GH_TOKEN}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(r.ok){setSyncStatus('Synced ✓','var(--gr)');lastSyncTime=Date.now();}
-    else{setSyncStatus('Sync error','var(--re)');}
-  }catch(e){setSyncStatus('Offline','var(--t3)');}
-}
-
 function save(){
   const d=JSON.stringify({clients,v:3});
   try{localStorage.setItem('ks_d',d);}catch(e){}
-  // Debounce GitHub sync — wait 1.5s after last change
-  clearTimeout(syncTimeout);
-  setSyncStatus('Saving...','var(--am)');
-  syncTimeout=setTimeout(()=>pushToGitHub(),1500);
+  if(driveOn&&aToken)saveDrive(d);
+}
+
+function loadData(){
+  try{const raw=localStorage.getItem('ks_d');if(raw){const p=JSON.parse(raw);clients=p.clients||[];}}catch(e){clients=[];}
+  const t=localStorage.getItem('ks_at');
+  if(t){aToken=t;driveOn=true;updateSyncUI(true);loadDrive();}
+  else{renderClients();renderStatsBar();}
 }
 
 function manualSync(){
-  setSyncStatus('Syncing...','var(--am)');
-  loadData();
+  if(driveOn){loadDrive();}
+  else{document.getElementById('moSync').classList.add('open');}
+}
+
+function updateSyncUI(on){
+  const btn=document.getElementById('syncBtn');
+  const lbl=document.getElementById('syncLbl');
+  if(on){btn.classList.add('on');lbl.textContent='Drive Synced';setSyncStatus('Synced ✓','var(--gr)');}
+  else{btn.classList.remove('on');lbl.textContent='Connect Drive';setSyncStatus('','');}
 }
 
 function setSyncStatus(msg,color){
   const el=document.getElementById('syncStatus');
   if(el){el.textContent=msg;el.style.color=color;}
 }
+
+async function saveDrive(data){
+  try{
+    if(!driveFileId){
+      const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${DFILE}' and trashed=false&spaces=appDataFolder`,{headers:{Authorization:`Bearer ${aToken}`}});
+      if(!r.ok){handleExpiredToken();return;}
+      const d=await r.json();
+      if(d.files&&d.files.length)driveFileId=d.files[0].id;
+    }
+    if(driveFileId){
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`,{method:'PATCH',headers:{Authorization:`Bearer ${aToken}`,'Content-Type':'application/json'},body:data});
+    }else{
+      const f=new FormData();
+      f.append('metadata',new Blob([JSON.stringify({name:DFILE,parents:['appDataFolder']})],{type:'application/json'}));
+      f.append('file',new Blob([data],{type:'application/json'}));
+      const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{Authorization:`Bearer ${aToken}`},body:f});
+      if(r.ok)driveFileId=(await r.json()).id;
+    }
+    setSyncStatus('Synced ✓','var(--gr)');
+  }catch(e){setSyncStatus('Sync error','var(--re)');}
+}
+
+async function loadDrive(){
+  setSyncStatus('Syncing...','var(--am)');
+  try{
+    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${DFILE}' and trashed=false&spaces=appDataFolder`,{headers:{Authorization:`Bearer ${aToken}`}});
+    if(!r.ok){handleExpiredToken();return;}
+    const d=await r.json();
+    if(d.files&&d.files.length){
+      driveFileId=d.files[0].id;
+      const fr=await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,{headers:{Authorization:`Bearer ${aToken}`}});
+      if(fr.ok){
+        const fd=await fr.json();
+        const driveClients=fd.clients||[];
+        if(driveClients.length>=clients.length){
+          clients=driveClients;
+          localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
+        }else{
+          saveDrive(JSON.stringify({clients,v:3}));
+        }
+      }
+    }else{
+      saveDrive(JSON.stringify({clients,v:3}));
+    }
+    setSyncStatus('Synced ✓','var(--gr)');
+  }catch(e){setSyncStatus('Offline','var(--t3)');}
+  renderClients();renderStatsBar();
+}
+
+function handleExpiredToken(){
+  localStorage.removeItem('ks_at');
+  aToken=null;driveOn=false;
+  updateSyncUI(false);
+  renderClients();renderStatsBar();
+  document.getElementById('moSync').classList.add('open');
+}
+
+function signInGoogle(){
+  if(typeof google==='undefined'){
+    const s=document.createElement('script');
+    s.src='https://accounts.google.com/gsi/client';
+    s.onload=initGA;
+    document.head.appendChild(s);
+  }else{initGA();}
+}
+
+function initGA(){
+  google.accounts.oauth2.initTokenClient({
+    client_id:GCL,
+    scope:'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file',
+    callback:(r)=>{
+      if(r.access_token){
+        aToken=r.access_token;
+        localStorage.setItem('ks_at',aToken);
+        driveOn=true;
+        updateSyncUI(true);
+        closeMo('moSync');
+        loadDrive();
+        toast('Google Drive connected!','s');
+      }
+    }
+  }).requestAccessToken();
+}
+
+function useLocal(){closeMo('moSync');renderClients();renderStatsBar();}
 
 // ── STRIPE ─────────────────────────────────────────────────────────────────────
 function openStripeModal(){if(stripeKey)document.getElementById('skInput').value=stripeKey;document.getElementById('moStripe').classList.add('open');}
