@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keystone — Setter Hub</title>
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0c0c;--s1:#111;--s2:#181818;--s3:#1f1f1f;--b1:#2a2a2a;--b2:#333;--or:#ff6a00;--or2:#ff8533;--ord:rgba(255,106,0,.12);--gr:#4ade80;--am:#f59e0b;--re:#ef4444;--pu:#a78bfa;--tx:#f5f5f5;--t2:#888;--t3:#555;--r:10px;--r2:6px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px;}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:54px;background:var(--s1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:200;}
+.logo{font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
+.logo span{color:var(--or);}
+.hdr-r{display:flex;align-items:center;gap:8px;}
+.hbtn{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);color:var(--t2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.hbtn:hover{border-color:var(--or);color:var(--tx);}
+.hbtn.on{color:var(--gr);border-color:rgba(74,222,128,.35);}
+.hbtn.on-s{color:var(--pu);border-color:rgba(167,139,250,.35);}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--t3);}
+.hbtn.on .dot{background:var(--gr);box-shadow:0 0 5px var(--gr);}
+.sync-status{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;}
+.tabs{display:flex;padding:0 24px;border-bottom:1px solid var(--b1);background:var(--s1);}
+.tab{padding:12px 16px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;}
+.tab:hover{color:var(--t2);}.tab.active{color:var(--or);border-bottom-color:var(--or);}
+.main{padding:22px 24px;max-width:1200px;margin:0 auto;}
+.page{display:none;}.page.active{display:block;}
+.stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+.stat-pill{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:14px 16px;}
+.stat-pill-val{font-size:22px;font-weight:800;font-family:'DM Mono',monospace;line-height:1;}
+.stat-pill-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-top:4px;}
+.stat-pill.or{border-left:3px solid var(--or);}.stat-pill.gr{border-left:3px solid var(--gr);}
+.stat-pill.am{border-left:3px solid var(--am);}.stat-pill.re{border-left:3px solid var(--re);}
+.controls{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.search-wrap{position:relative;flex:1;min-width:200px;}
+.search-wrap input{width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);color:var(--tx);font-family:'Syne',sans-serif;font-size:13px;padding:9px 12px 9px 36px;outline:none;transition:border-color .2s;}
+.search-wrap input:focus{border-color:var(--or);}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:14px;}
+.sort-sel{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);color:var(--t2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:9px 12px;cursor:pointer;outline:none;transition:border-color .2s;text-transform:uppercase;letter-spacing:.05em;}
+.sort-sel:focus{border-color:var(--or);}.sort-sel option{background:var(--s2);}
+.filters{display:flex;gap:6px;}
+.fb{padding:7px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:20px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--t3);cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.fb:hover{border-color:var(--b2);color:var(--t2);}.fb.active{background:var(--or);border-color:var(--or);color:#fff;}
+.btn{padding:9px 16px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border-radius:var(--r2);cursor:pointer;transition:all .18s;border:none;}
+.btn-or{background:var(--or);color:#fff;}.btn-or:hover{background:var(--or2);}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--b2);}.btn-ghost:hover{border-color:var(--or);color:var(--tx);}
+.btn-re{background:transparent;color:var(--re);border:1px solid rgba(239,68,68,.3);}.btn-re:hover{background:var(--re);color:#fff;}
+.btn-am{background:rgba(245,158,11,.15);color:var(--am);border:1px solid rgba(245,158,11,.3);}.btn-am:hover{background:var(--am);color:#000;}
+.btn-gr{background:rgba(74,222,128,.12);color:var(--gr);border:1px solid rgba(74,222,128,.3);}.btn-gr:hover{background:var(--gr);color:#000;}
+.btn-sm{padding:5px 10px;font-size:10px;}.btn-xs{padding:3px 8px;font-size:10px;}
+.client-list{display:flex;flex-direction:column;gap:8px;}
+.client-row{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;transition:all .18s;}
+.client-row:hover{border-color:var(--b2);box-shadow:0 4px 16px rgba(0,0,0,.3);}
+.client-row.s-re{border-left:3px solid var(--re);}.client-row.s-am{border-left:3px solid var(--am);}.client-row.s-gr{border-left:3px solid var(--gr);}
+.crow-main{display:grid;grid-template-columns:2fr auto auto auto auto auto;align-items:center;gap:16px;padding:14px 18px;cursor:pointer;}
+.crow-name{font-size:14px;font-weight:700;}.crow-company{font-size:11px;color:var(--t2);margin-top:2px;font-family:'DM Mono',monospace;}
+.crow-badge-wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px;}
+.badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
+.badge-ppa{background:var(--ord);color:var(--or);border:1px solid rgba(255,106,0,.25);}
+.badge-pif{background:rgba(74,222,128,.08);color:var(--gr);border:1px solid rgba(74,222,128,.2);}
+.badge-re{background:rgba(239,68,68,.1);color:var(--re);border:1px solid rgba(239,68,68,.25);}
+.badge-am{background:rgba(245,158,11,.1);color:var(--am);border:1px solid rgba(245,158,11,.25);}
+.badge-gr{background:rgba(74,222,128,.08);color:var(--gr);border:1px solid rgba(74,222,128,.2);}
+.badge-pu{background:rgba(167,139,250,.1);color:var(--pu);border:1px solid rgba(167,139,250,.25);}
+.badge-ob-needs{background:rgba(99,102,241,.12);color:#818cf8;border:1px solid rgba(99,102,241,.25);}
+.badge-ob-started{background:rgba(245,158,11,.1);color:var(--am);border:1px solid rgba(245,158,11,.25);}
+.badge-ob-live{background:rgba(74,222,128,.08);color:var(--gr);border:1px solid rgba(74,222,128,.2);}
+.crow-stat{text-align:center;min-width:60px;}
+.crow-stat-val{font-size:18px;font-weight:800;font-family:'DM Mono',monospace;line-height:1;}
+.crow-stat-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-top:3px;}
+.crow-prog{display:flex;flex-direction:column;gap:4px;min-width:100px;}
+.prog-bar{height:4px;background:var(--s3);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:2px;transition:width .4s;}
+.fill-or{background:var(--or);}.fill-gr{background:var(--gr);}.fill-am{background:var(--am);}.fill-re{background:var(--re);}
+.prog-label{font-size:10px;color:var(--t2);display:flex;justify-content:space-between;}
+.crow-booking-ctrl{display:flex;align-items:center;gap:0;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);overflow:hidden;flex-shrink:0;}
+.bk-btn{width:32px;height:36px;background:none;border:none;color:var(--t2);font-size:18px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;line-height:1;}
+.bk-btn:hover{background:var(--b2);color:var(--tx);}
+.bk-btn.bk-plus:hover{background:var(--or);color:#fff;}
+.bk-btn.bk-minus:hover{background:rgba(239,68,68,.7);color:#fff;}
+.bk-count{min-width:36px;text-align:center;font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:var(--tx);padding:0 4px;border-left:1px solid var(--b1);border-right:1px solid var(--b1);}
+.inv-alert{margin:0 18px 12px;padding:11px 14px;border-radius:var(--r2);display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;flex-wrap:wrap;}
+.inv-alert.needs-send{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);}
+.inv-alert.waiting{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);}
+.inv-alert.paid{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);}
+.inv-alert.neutral{background:var(--s2);border:1px solid var(--b1);}
+.inv-alert.declined{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);}
+.inv-alert-txt{font-weight:600;}
+.inv-alert-txt span{color:var(--t2);font-weight:400;margin-left:6px;font-size:11px;}
+.crow-expanded{display:none;border-top:1px solid var(--b1);padding:18px;}
+.crow-expanded.open{display:block;}
+.exp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;}
+.exp-section{background:var(--s2);border-radius:var(--r);padding:14px;}
+.exp-section.full{grid-column:1/-1;}
+.exp-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--or);margin-bottom:11px;}
+.erow{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--b1);font-size:12px;}
+.erow:last-child{border-bottom:none;}
+.erow-l{color:var(--t3);}.erow-r{font-family:'DM Mono',monospace;font-weight:600;}
+.blog-add{display:flex;gap:8px;margin-bottom:10px;}
+.blog-add input{flex:1;background:var(--s3);border:1px solid var(--b1);border-radius:var(--r2);color:var(--tx);font-family:'Syne',sans-serif;font-size:12px;padding:7px 10px;outline:none;}
+.blog-add input:focus{border-color:var(--or);}
+.blog-entry{display:flex;align-items:center;gap:8px;padding:7px 9px;background:var(--s3);border-radius:var(--r2);margin-bottom:5px;font-size:12px;}
+.be-date{color:var(--t3);font-family:'DM Mono',monospace;font-size:10px;white-space:nowrap;}
+.be-note{flex:1;color:var(--t2);}
+.be-del{color:var(--t3);cursor:pointer;font-size:11px;transition:color .2s;}.be-del:hover{color:var(--re);}
+.month-chart{display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:8px;}
+.mc-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;}
+.mc-bar{width:100%;background:var(--or);border-radius:2px 2px 0 0;min-height:2px;transition:height .3s;}
+.mc-label{font-size:9px;color:var(--t3);font-family:'DM Mono',monospace;}
+.mc-val{font-size:9px;color:var(--t2);font-family:'DM Mono',monospace;}
+.ob-tog{display:flex;gap:8px;margin-top:2px;}
+.ob-opt{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer;transition:all .18s;text-align:center;}
+.ob-opt:hover{border-color:var(--b2);}.ob-opt.sel{border-color:var(--or);background:var(--ord);}
+.ob-icon{font-size:18px;line-height:1;}.ob-label{font-size:11px;font-weight:700;letter-spacing:.03em;}
+.empty{text-align:center;padding:60px 20px;color:var(--t3);}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.3;}.empty h3{font-size:15px;color:var(--t2);margin-bottom:6px;}.empty p{font-size:12px;}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);}
+.mo.open{display:flex;}
+.md{background:var(--s1);border:1px solid var(--b2);border-radius:14px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;padding:24px;position:relative;}
+.md-lg{max-width:820px;}
+.md-title{font-size:17px;font-weight:800;letter-spacing:-.02em;margin-bottom:18px;}
+.md-x{position:absolute;top:16px;right:16px;width:26px;height:26px;background:var(--s3);border:1px solid var(--b1);border-radius:5px;cursor:pointer;color:var(--t2);font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.md-x:hover{background:var(--b1);color:var(--tx);}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fgrp{display:flex;flex-direction:column;gap:5px;}.fgrp.full{grid-column:1/-1;}
+.fl{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--t2);}
+.fi,.fs,.fta{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r2);color:var(--tx);font-family:'Syne',sans-serif;font-size:13px;padding:8px 10px;transition:border-color .2s;outline:none;width:100%;}
+.fi:focus,.fs:focus,.fta:focus{border-color:var(--or);}
+.fs option{background:var(--s2);}.fta{resize:vertical;min-height:70px;}
+.fsec{grid-column:1/-1;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--or);padding:8px 0 3px;border-top:1px solid var(--b1);margin-top:4px;}
+.ct-tog{grid-column:1/-1;display:flex;gap:8px;}
+.ct-opt{flex:1;padding:10px;border:1px solid var(--b1);border-radius:var(--r);cursor:pointer;text-align:center;transition:all .2s;background:var(--s2);}
+.ct-opt:hover{border-color:var(--b2);}.ct-opt.sel{border-color:var(--or);background:var(--ord);}
+.ct-opt-l{font-size:12px;font-weight:700;}.ct-opt-d{font-size:10px;color:var(--t3);margin-top:2px;}
+.factions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;grid-column:1/-1;}
+.stats-overview{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+.so-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px;}
+.so-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--or);margin-bottom:14px;}
+.client-month-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--b1);}
+.client-month-row:last-child{border-bottom:none;}
+.cmr-name{font-size:12px;font-weight:700;width:130px;flex-shrink:0;}
+.cmr-bars{flex:1;display:flex;align-items:flex-end;gap:3px;height:40px;}
+.cmr-bar{flex:1;background:var(--or);border-radius:2px 2px 0 0;min-height:2px;opacity:.8;}
+.cmr-bar:last-child{opacity:1;}
+.cmr-total{font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--or);width:30px;text-align:right;flex-shrink:0;}
+.dist-mode-tog{display:inline-flex;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden;margin-bottom:4px;}
+.dist-mode-btn{padding:7px 18px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em;background:none;border:none;color:var(--t3);cursor:pointer;transition:all .2s;}
+.dist-mode-btn.active{background:var(--or);color:#fff;}
+.dist-mode-btn:hover:not(.active){color:var(--t2);}
+.dist-hero{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:24px;margin-bottom:18px;text-align:center;}
+.dist-row{display:flex;gap:10px;max-width:380px;margin:0 auto;}
+.dist-row .fi{text-transform:uppercase;letter-spacing:.1em;font-family:'DM Mono',monospace;font-size:14px;}
+.dist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}
+.dist-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:13px;display:flex;align-items:center;gap:11px;}
+.dist-card.inr{border-color:rgba(74,222,128,.25);background:rgba(74,222,128,.03);}
+.dist-card.outr{opacity:.5;}
+.dist-ico{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.dist-ico.in{background:rgba(74,222,128,.12);}.dist-ico.out{background:rgba(239,68,68,.08);}
+.dist-info{flex:1;}.dist-name{font-size:12px;font-weight:700;}.dist-detail{font-size:10px;color:var(--t2);margin-top:2px;font-family:'DM Mono',monospace;}
+.dist-mi{font-size:16px;font-weight:800;font-family:'DM Mono',monospace;text-align:right;}
+.dist-mi.in{color:var(--gr);}.dist-mi.out{color:var(--re);}
+.sp{width:15px;height:15px;border:2px solid var(--b1);border-top-color:var(--or);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);padding:10px 15px;font-size:12px;font-weight:600;color:var(--tx);z-index:9999;transform:translateY(60px);opacity:0;transition:all .25s;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.s{border-left:3px solid var(--gr);}.toast.e{border-left:3px solid var(--re);}.toast.i{border-left:3px solid var(--or);}
+@media(max-width:900px){.crow-main{grid-template-columns:1fr auto;}.crow-mid{display:none;}.stats-bar{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px){.main,.hdr{padding-left:14px;padding-right:14px;}.tabs{padding:0 14px;}.stats-bar{grid-template-columns:1fr 1fr;}.exp-grid{grid-template-columns:1fr;}.controls{flex-direction:column;align-items:stretch;}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="logo">Keystone <span>Setters</span></div>
+  <div class="hdr-r">
+    <span class="sync-status" id="syncStatus"></span>
+    <button class="hbtn" id="syncBtn" onclick="manualSync()"><span class="dot" id="syncDot"></span><span id="syncLbl">Connect Drive</span></button>
+    <button class="hbtn" id="sBtn" onclick="openStripeModal()">⚡ <span id="sLbl">Stripe</span></button>
+    <button class="btn btn-or" style="font-size:11px;" onclick="openAdd()">+ Add Client</button>
+  </div>
+</header>
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('clients',this)">Clients</button>
+  <button class="tab" onclick="switchTab('stats',this)">Monthly Stats</button>
+  <button class="tab" onclick="switchTab('distance',this)">Distance Checker</button>
+</div>
+<main class="main">
+  <div class="page active" id="page-clients">
+    <div class="stats-bar" id="statsBar"></div>
+    <div class="controls">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search clients..." oninput="renderClients()">
+      </div>
+      <select class="sort-sel" id="sortSel" onchange="renderClients()">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="bookings-hi">Most Bookings</option>
+        <option value="bookings-lo">Fewest Bookings</option>
+        <option value="status">By Status</option>
+        <option value="az">A to Z</option>
+      </select>
+      <div class="filters">
+        <button class="fb active" onclick="setFilter('all',this)">All</button>
+        <button class="fb" onclick="setFilter('on-track',this)">On Track</button>
+        <button class="fb" onclick="setFilter('amber',this)">DEFCON 2</button>
+        <button class="fb" onclick="setFilter('red',this)">DEFCON 1</button>
+        <button class="fb" onclick="setFilter('invoice',this)">Invoice Due</button>
+      </div>
+    </div>
+    <div class="client-list" id="clientList"></div>
+  </div>
+  <div class="page" id="page-stats">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-size:19px;font-weight:800;">Monthly Performance</div>
+      <select class="sort-sel" id="statsPeriod" onchange="renderStats()">
+        <option value="6">Last 6 months</option>
+        <option value="12">Last 12 months</option>
+        <option value="3">Last 3 months</option>
+      </select>
+    </div>
+    <div id="statsContent"></div>
+  </div>
+  <div class="page" id="page-distance">
+    <div class="dist-hero">
+      <div style="font-size:17px;font-weight:800;margin-bottom:5px;">📍 Distance Checker</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:16px;">Enter a lead's postcode — check against all client radii</div>
+      <div class="dist-mode-tog">
+        <button class="dist-mode-btn active" id="modeBtn-miles" onclick="setDistMode('miles',this)">📏 Miles</button>
+        <button class="dist-mode-btn" id="modeBtn-time" onclick="setDistMode('time',this)">🚗 Drive Time</button>
+      </div>
+      <div id="mapsKeyWrap" style="display:none;margin:12px auto;max-width:420px;">
+        <div style="background:rgba(255,106,0,.08);border:1px solid rgba(255,106,0,.25);border-radius:var(--r2);padding:10px 13px;font-size:11px;color:var(--t2);text-align:left;margin-bottom:8px;">
+          ⚡ Drive time needs a <strong style="color:var(--tx);">Google Maps API key</strong> — console.cloud.google.com → Distance Matrix API → Credentials.
+        </div>
+        <div style="display:flex;gap:8px;">
+          <input class="fi" id="mapsKeyInput" type="password" placeholder="AIza..." style="flex:1;font-size:12px;">
+          <button class="btn btn-or" style="white-space:nowrap;" onclick="saveMapsKey()">Save Key</button>
+        </div>
+      </div>
+      <div class="dist-row" style="margin-top:14px;">
+        <input class="fi" id="leadPC" placeholder="e.g. M1 1AE" maxlength="10" onkeydown="if(event.key==='Enter')checkDist()">
+        <button class="btn btn-or" onclick="checkDist()">Check</button>
+      </div>
+      <div id="distErr" style="color:var(--re);font-size:11px;margin-top:8px;display:none;"></div>
+    </div>
+    <div id="distResults"></div>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+
+<!-- DRIVE MODAL -->
+<div class="mo" id="moSync">
+  <div class="md" style="max-width:380px;">
+    <button class="md-x" onclick="closeMo('moSync')">✕</button>
+    <div style="text-align:center;padding:8px 0;">
+      <div style="font-size:42px;margin-bottom:12px;">☁️</div>
+      <div style="font-size:16px;font-weight:800;margin-bottom:6px;">Connect Google Drive</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px;">Sign in once — data syncs across every browser and device automatically.</div>
+      <button style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;background:#fff;color:#333;border:none;border-radius:var(--r2);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin:0 auto 10px;width:100%;max-width:260px;" onclick="signInGoogle()">
+        <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        Sign in with Google
+      </button>
+      <button style="display:block;width:100%;max-width:260px;margin:0 auto;padding:8px;background:transparent;border:1px solid var(--b1);border-radius:var(--r2);color:var(--t3);font-family:'Syne',sans-serif;font-size:11px;cursor:pointer;" onclick="useLocal()">Use local storage only</button>
+    </div>
+  </div>
+</div>
+
+<!-- STRIPE MODAL -->
+<div class="mo" id="moStripe">
+  <div class="md" style="max-width:400px;">
+    <button class="md-x" onclick="closeMo('moStripe')">✕</button>
+    <div class="md-title">⚡ Connect Stripe</div>
+    <p style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:14px;">Pull live invoice status. Use a <strong style="color:var(--tx);">restricted read-only key</strong> from your Stripe dashboard.</p>
+    <div class="fgrp" style="margin-bottom:10px;">
+      <label class="fl">Restricted API Key (rk_live_...)</label>
+      <div style="display:flex;gap:8px;"><input class="fi" id="skInput" type="password" placeholder="rk_live_..." style="flex:1;"><button class="btn btn-or" onclick="saveStripeKey()">Save</button></div>
+    </div>
+    <div style="padding-top:12px;border-top:1px solid var(--b1);"><button class="btn btn-re btn-sm" onclick="removeStripeKey()">Remove Key</button></div>
+  </div>
+</div>
+
+<!-- ADD/EDIT CLIENT MODAL -->
+<div class="mo" id="moClient">
+  <div class="md md-lg">
+    <button class="md-x" onclick="closeMo('moClient')">✕</button>
+    <div class="md-title" id="moClientTitle">Add New Client</div>
+    <div class="fg">
+      <div class="fsec">Client Details</div>
+      <div class="fgrp"><label class="fl">Client Name *</label><input class="fi" id="f_name" placeholder="e.g. John Smith"></div>
+      <div class="fgrp"><label class="fl">Company Name</label><input class="fi" id="f_company" placeholder="e.g. Acme Solar Ltd"></div>
+      <div class="fgrp"><label class="fl">Niche / Industry</label><input class="fi" id="f_niche" placeholder="e.g. Solar, Roofing..."></div>
+      <div class="fgrp"><label class="fl">Location Postcode</label><input class="fi" id="f_postcode" placeholder="e.g. M1 1AE" style="text-transform:uppercase"></div>
+      <div class="fgrp"><label class="fl">Service Radius (miles)</label><input class="fi" id="f_radius" type="number" placeholder="e.g. 25"></div>
+      <div class="fgrp"><label class="fl">Status Override</label>
+        <select class="fs" id="f_status"><option value="auto">Auto (smart tracking)</option><option value="on-track">Force On Track</option><option value="amber">Force DEFCON 2</option><option value="red">Force DEFCON 1</option></select>
+      </div>
+      <div class="fsec">Booking Preferences</div>
+      <div class="fgrp"><label class="fl">Booking Target / Guarantee</label><input class="fi" id="f_target" type="number" placeholder="e.g. 10"></div>
+      <div class="fgrp"><label class="fl">Current Bookings</label><input class="fi" id="f_current" type="number" value="0"></div>
+      <div class="fgrp full"><label class="fl">Booking Preferences for Setters</label><textarea class="fta" id="f_prefs" placeholder="Residential only, no flats, within 20 miles..."></textarea></div>
+      <div class="fsec">Contract Type</div>
+      <div class="fgrp full">
+        <div class="ct-tog">
+          <div class="ct-opt sel" id="opt-ppa" onclick="selContract('ppa')"><div class="ct-opt-l">💳 Pay Per Appointment</div><div class="ct-opt-d">Charged per qualified booking</div></div>
+          <div class="ct-opt" id="opt-pif" onclick="selContract('pif')"><div class="ct-opt-l">📦 Flat Fee / Retainer</div><div class="ct-opt-d">Fixed fee for guarantee period</div></div>
+        </div>
+      </div>
+      <div id="ppa-fields" style="display:contents;">
+        <div class="fgrp"><label class="fl">Setup Fee £</label><input class="fi" id="f_setup" type="number" placeholder="e.g. 500"></div>
+        <div class="fgrp"><label class="fl">Per Qualified Booking £</label><input class="fi" id="f_perbooking" type="number" placeholder="e.g. 150"></div>
+        <div class="fgrp"><label class="fl">Monthly Booking Target</label><input class="fi" id="f_monthlytarget" type="number" placeholder="e.g. 8 per month"></div>
+        <div class="fgrp"><label class="fl">Contract Start Date</label><input class="fi" id="f_ppa_startdate" type="date"></div>
+        <div class="fgrp full"><label class="fl">Send Invoice Every (bookings)</label>
+          <div style="display:flex;gap:8px;">
+            <select class="fs" id="f_invevery" style="flex:1;" onchange="document.getElementById('f_invCW').style.display=this.value==='custom'?'flex':'none'">
+              <option value="1">Every 1</option><option value="2">Every 2</option><option value="3">Every 3</option><option value="5" selected>Every 5</option><option value="10">Every 10</option><option value="custom">Custom</option>
+            </select>
+            <div id="f_invCW" style="display:none;"><input class="fi" id="f_invCustom" type="number" placeholder="e.g. 7" style="width:80px;"></div>
+          </div>
+        </div>
+        <div class="fgrp"><label class="fl">Invoice Amount £</label><input class="fi" id="f_invamt" type="number" placeholder="e.g. 750"></div>
+        <div class="fgrp"><label class="fl">Stripe Invoice ID (optional)</label><input class="fi" id="f_stripe_ppa" placeholder="in_1ABC..."></div>
+      </div>
+      <div id="pif-fields" style="display:none;grid-column:1/-1;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="fgrp"><label class="fl">Total Fee £</label><input class="fi" id="f_totalfee" type="number" placeholder="e.g. 2000"></div>
+          <div class="fgrp"><label class="fl">Guarantee Period</label>
+            <select class="fs" id="f_period" onchange="document.getElementById('f_cdw').style.display=this.value==='custom'?'block':'none'">
+              <option value="30">30 days</option><option value="45">45 days</option><option value="60">60 days</option><option value="90" selected>90 days</option><option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="fgrp" id="f_cdw" style="display:none;"><label class="fl">Custom Days</label><input class="fi" id="f_customdays" type="number"></div>
+          <div class="fgrp"><label class="fl">Start Date</label><input class="fi" id="f_startdate" type="date"></div>
+          <div class="fgrp"><label class="fl">Payment Terms</label>
+            <select class="fs" id="f_terms"><option value="upfront">Full upfront</option><option value="split">50/50</option><option value="monthly">Monthly</option></select>
+          </div>
+          <div class="fgrp"><label class="fl">Invoice Status</label>
+            <select class="fs" id="f_inv_pif"><option value="unpaid">Pending</option><option value="paid">Paid</option><option value="declined">Declined</option></select>
+          </div>
+          <div class="fgrp"><label class="fl">Renewal Status</label>
+            <select class="fs" id="f_renewal"><option value="none">—</option><option value="renewing">Renewing</option><option value="at-risk">At Risk</option><option value="churned">Churned</option></select>
+          </div>
+          <div class="fgrp"><label class="fl">Stripe Invoice ID (optional)</label><input class="fi" id="f_stripe_pif" placeholder="in_1ABC..."></div>
+        </div>
+      </div>
+      <div class="fsec">Onboarding</div>
+      <div class="fgrp full">
+        <label class="fl">Onboarding Stage (select all that apply)</label>
+        <div class="ob-tog">
+          <div class="ob-opt" id="ob-needs" onclick="toggleOb('needs')"><div class="ob-icon">📋</div><div class="ob-label">Needs Onboarding</div></div>
+          <div class="ob-opt" id="ob-started" onclick="toggleOb('started')"><div class="ob-icon">⚙️</div><div class="ob-label">Onboarding Started</div></div>
+          <div class="ob-opt" id="ob-live" onclick="toggleOb('live')"><div class="ob-icon">🟢</div><div class="ob-label">Live</div></div>
+        </div>
+      </div>
+      <div class="fsec">Notes</div>
+      <div class="fgrp full"><label class="fl">Setter Briefing Notes</label><textarea class="fta" id="f_notes" style="min-height:80px;" placeholder="Background, key contacts, what to mention on calls..."></textarea></div>
+      <div class="factions">
+        <button class="btn btn-ghost" onclick="closeMo('moClient')">Cancel</button>
+        <button class="btn btn-or" onclick="saveClient()">Save Client</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let clients=[],editId=null,curContract='ppa',curFilter='all';
+let stripeKey=null,expandedIds=new Set();
+let syncTimeout=null;
+
+const GCL='234293704596-h0cvhdl9nffm335bamnlk7251b1dtcbi.apps.googleusercontent.com';
+const DFILE='ks-setters-v2.json';
+let driveOn=false,driveFileId=null,aToken=null;
+
+window.addEventListener('load',()=>{
+  stripeKey=localStorage.getItem('ks_sk')||null;
+  updateStripeUI();
+  loadData();
+});
+
+// Pre-loaded client data
+const SEED_CLIENTS=[
+  {id:'1000000001',name:'Gabriel Talase',company:'Gabriel Maintenance Pro',niche:'Bathrooms',postcode:'NW90BB',radius:'15',status:'auto',target:'50',current:'32',contractType:'pif',period:'180',startDate:'2026-02-14',totalfee:'4000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'Open to most timings - now focused more on quality rather than quantity',bookings:[]},
+  {id:'1000000002',name:'Sandel Musca',company:'MBT Group',niche:'Bathrooms',postcode:'EC1V2NX',radius:'15',status:'auto',target:'25',current:'11',contractType:'pif',period:'90',startDate:'2026-04-05',totalfee:'2000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'Gets lots of lead flow so can mass book',bookings:[]},
+  {id:'1000000003',name:'Robert Nagy',company:'Marilyns Kitchens',niche:'Kitchens',postcode:'OX262BE',radius:'20',status:'auto',target:'25',current:'10',contractType:'pif',period:'90',startDate:'2026-03-20',totalfee:'2000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'More of an urgency - they no show some bookings',bookings:[]},
+  {id:'1000000004',name:'Tom Millin',company:'Fluent Ads',niche:'Architectural',postcode:'TW166SB',radius:'15',status:'auto',target:'30',current:'13',contractType:'pif',period:'150',startDate:'2026-03-30',totalfee:'750',terms:'monthly',inv_pif:'paid',onboarding:['live'],prefs:'Book in advice calls which then turn into at home consultations. Main priority right now is having people with a close timeline and also within their service area',bookings:[]},
+  {id:'1000000005',name:'Marcin Maciula',company:'MM Building Services',niche:'Extensions',postcode:'SM51TS',radius:'18',status:'auto',target:'20',current:'8',contractType:'pif',period:'90',startDate:'2026-04-10',totalfee:'2000',terms:'split',inv_pif:'paid',onboarding:['live'],prefs:'Struggles on sales - big on location and service area',bookings:[]},
+  {id:'1000000006',name:'Yusuf and Tausif Darbar',company:'Fixzen Services',niche:'Extensions',postcode:'E78HQ',radius:'15',status:'auto',target:'20',current:'6',contractType:'ppa',setup:'1000',perbooking:'125',invEvery:'5',invamt:'625',monthlyTarget:'',ppaStartDate:'',onboarding:['live'],prefs:'Can only do some specific times - timeline big problem with them. They also no show bookings',bookings:[]},
+  {id:'1000000007',name:'Harry Brook',company:'Rune Construction',niche:'Kitchens',postcode:'TN389EY',radius:'20',status:'auto',target:'20',current:'8',contractType:'pif',period:'90',startDate:'2026-04-28',totalfee:'2000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'Will travel further for jobs',notes:'Ads are currently off so no more leads will be coming in at the moment',bookings:[]},
+  {id:'1000000008',name:'Umair Zahid',company:'Kabilo Ltd',niche:'Bathrooms',postcode:'E176QN',radius:'15',status:'auto',target:'25',current:'7',contractType:'pif',period:'90',startDate:'2026-05-11',totalfee:'2000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'Has multiple people that can go out and do the site visits. Can handle all projects so possibly lead share with other companies',bookings:[]},
+  {id:'1000000009',name:'Chris Smith',company:'Smiths Kitchens',niche:'Kitchens',postcode:'RH203DD',radius:'20',status:'auto',target:'25',current:'0',contractType:'ppa',setup:'1000',perbooking:'100',invEvery:'5',invamt:'500',monthlyTarget:'',ppaStartDate:'',onboarding:['live'],prefs:'Serious trust issues - new client so load with bookings',bookings:[]},
+];
+
+function switchTab(t,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+t).classList.add('active');
+  el.classList.add('active');
+  if(t==='stats')renderStats();
+}
+
+function save(){
+  const d=JSON.stringify({clients,v:3});
+  try{localStorage.setItem('ks_d',d);}catch(e){}
+  if(driveOn&&aToken)saveDrive(d);
+}
+
+function loadData(){
+  try{const raw=localStorage.getItem('ks_d');if(raw){const p=JSON.parse(raw);clients=p.clients||[];}}catch(e){clients=[];}
+  // If no clients yet, use seed data
+  if(clients.length===0)clients=SEED_CLIENTS.map(c=>({...c}));
+  const t=localStorage.getItem('ks_at');
+  if(t){aToken=t;driveOn=true;updateSyncUI(true);loadDrive();}
+  else{renderClients();renderStatsBar();}
+}
+
+function manualSync(){
+  if(driveOn){loadDrive();}
+  else{document.getElementById('moSync').classList.add('open');}
+}
+
+function updateSyncUI(on){
+  const btn=document.getElementById('syncBtn');
+  const lbl=document.getElementById('syncLbl');
+  if(on){btn.classList.add('on');lbl.textContent='Drive Synced';setSyncStatus('Synced ✓','var(--gr)');}
+  else{btn.classList.remove('on');lbl.textContent='Connect Drive';setSyncStatus('','');}
+}
+
+function setSyncStatus(msg,color){
+  const el=document.getElementById('syncStatus');
+  if(el){el.textContent=msg;el.style.color=color;}
+}
+
+async function saveDrive(data){
+  try{
+    if(!driveFileId){
+      const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${DFILE}' and trashed=false&spaces=appDataFolder`,{headers:{Authorization:`Bearer ${aToken}`}});
+      if(!r.ok){handleExpiredToken();return;}
+      const d=await r.json();
+      if(d.files&&d.files.length)driveFileId=d.files[0].id;
+    }
+    if(driveFileId){
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`,{method:'PATCH',headers:{Authorization:`Bearer ${aToken}`,'Content-Type':'application/json'},body:data});
+    }else{
+      const f=new FormData();
+      f.append('metadata',new Blob([JSON.stringify({name:DFILE,parents:['appDataFolder']})],{type:'application/json'}));
+      f.append('file',new Blob([data],{type:'application/json'}));
+      const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{Authorization:`Bearer ${aToken}`},body:f});
+      if(r.ok)driveFileId=(await r.json()).id;
+    }
+    setSyncStatus('Synced ✓','var(--gr)');
+  }catch(e){setSyncStatus('Sync error','var(--re)');}
+}
+
+async function loadDrive(){
+  setSyncStatus('Syncing...','var(--am)');
+  try{
+    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${DFILE}' and trashed=false&spaces=appDataFolder`,{headers:{Authorization:`Bearer ${aToken}`}});
+    if(!r.ok){handleExpiredToken();return;}
+    const d=await r.json();
+    if(d.files&&d.files.length){
+      driveFileId=d.files[0].id;
+      const fr=await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,{headers:{Authorization:`Bearer ${aToken}`}});
+      if(fr.ok){
+        const fd=await fr.json();
+        const driveClients=fd.clients||[];
+        if(driveClients.length>=clients.length){
+          clients=driveClients;
+          localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
+        }else{
+          saveDrive(JSON.stringify({clients,v:3}));
+        }
+      }
+    }else{
+      saveDrive(JSON.stringify({clients,v:3}));
+    }
+    setSyncStatus('Synced ✓','var(--gr)');
+  }catch(e){setSyncStatus('Offline','var(--t3)');}
+  renderClients();renderStatsBar();
+}
+
+function handleExpiredToken(){
+  localStorage.removeItem('ks_at');
+  aToken=null;driveOn=false;
+  updateSyncUI(false);
+  renderClients();renderStatsBar();
+  document.getElementById('moSync').classList.add('open');
+}
+
+function signInGoogle(){
+  if(typeof google==='undefined'){
+    const s=document.createElement('script');
+    s.src='https://accounts.google.com/gsi/client';
+    s.onload=initGA;
+    document.head.appendChild(s);
+  }else{initGA();}
+}
+
+function initGA(){
+  google.accounts.oauth2.initTokenClient({
+    client_id:GCL,
+    scope:'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file',
+    callback:(r)=>{
+      if(r.access_token){
+        aToken=r.access_token;
+        localStorage.setItem('ks_at',aToken);
+        driveOn=true;
+        updateSyncUI(true);
+        closeMo('moSync');
+        loadDrive();
+        toast('Google Drive connected!','s');
+      }
+    }
+  }).requestAccessToken();
+}
+
+function useLocal(){closeMo('moSync');renderClients();renderStatsBar();}
+
+// ── STRIPE ─────────────────────────────────────────────────────────────────────
+function openStripeModal(){if(stripeKey)document.getElementById('skInput').value=stripeKey;document.getElementById('moStripe').classList.add('open');}
+function saveStripeKey(){const v=document.getElementById('skInput').value.trim();if(!v)return;stripeKey=v;localStorage.setItem('ks_sk',v);updateStripeUI();closeMo('moStripe');toast('Stripe connected','s');}
+function removeStripeKey(){stripeKey=null;localStorage.removeItem('ks_sk');document.getElementById('skInput').value='';updateStripeUI();closeMo('moStripe');}
+function updateStripeUI(){const b=document.getElementById('sBtn');document.getElementById('sLbl').textContent=stripeKey?'Stripe ✓':'Stripe';if(stripeKey)b.classList.add('on-s');else b.classList.remove('on-s');}
+
+// ── HELPERS ────────────────────────────────────────────────────────────────────
+function getDaysLeft(c){
+  if(c.contractType!=='pif'||!c.startDate)return null;
+  const days=parseInt(c.period==='custom'?c.customDays:c.period)||90;
+  return Math.ceil((new Date(c.startDate).getTime()+days*86400000-Date.now())/86400000);
+}
+function getPct(c){return Math.min(100,Math.round(((parseInt(c.current)||0)/(parseInt(c.target)||1))*100));}
+function nowDateStr(){return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function getMonthKey(d){const x=d?new Date(d):new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0');}
+function getMonthLabel(k){const[y,m]=k.split('-');return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]+"'"+String(y).slice(2);}
+function lastNMonths(n){const ms=[];const d=new Date();for(let i=n-1;i>=0;i--){const x=new Date(d.getFullYear(),d.getMonth()-i,1);ms.push(x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0'));}return ms;}
+function getInvoiceEvery(c){if(c.invEvery==='custom')return parseInt(c.invCustom)||5;return parseInt(c.invEvery)||5;}
+function checkInvoiceTrigger(c){
+  if(c.contractType!=='ppa')return false;
+  const every=getInvoiceEvery(c),cur=parseInt(c.current)||0,lastAt=parseInt(c.lastInvoiceAt)||0;
+  return(cur-lastAt)>=every&&c.invState!=='needs-send'&&c.invState!=='waiting';
+}
+function getAutoStatus(c){
+  if(c.status&&c.status!=='auto')return c.status;
+  const current=parseInt(c.current)||0;
+  const target=parseInt(c.target)||0;
+  if(!target)return'on-track';
+  const bookingPct=Math.min(100,(current/target)*100);
+  if(c.contractType==='pif'&&c.startDate){
+    const totalDays=parseInt(c.period==='custom'?c.customDays:c.period)||90;
+    const elapsed=totalDays-Math.max(0,getDaysLeft(c)||0);
+    const timePct=Math.min(100,(elapsed/totalDays)*100);
+    const gap=timePct-bookingPct;
+    if(gap>25)return'red';if(gap>10)return'amber';return'on-track';
+  }else if(c.contractType==='ppa'&&c.ppaStartDate&&c.monthlyTarget){
+    // PPA with monthly target — check if on pace
+    const monthlyTarget=parseInt(c.monthlyTarget)||0;
+    const start=new Date(c.ppaStartDate);
+    const now=new Date();
+    const monthsElapsed=Math.max(0.1,(now-start)/(1000*60*60*24*30.44));
+    const expectedByNow=monthlyTarget*monthsElapsed;
+    const gap=expectedByNow-current;
+    if(gap>monthlyTarget*0.5)return'red';
+    if(gap>monthlyTarget*0.2)return'amber';
+    return'on-track';
+  }else{
+    if(bookingPct>=75)return'on-track';if(bookingPct>=40)return'amber';return'red';
+  }
+}
+
+// ── STATS BAR ──────────────────────────────────────────────────────────────────
+function renderStatsBar(){
+  const total=clients.length;
+  const totalBooks=clients.reduce((a,c)=>(a+(parseInt(c.current)||0)),0);
+  const onTrack=clients.filter(c=>getAutoStatus(c)==='on-track').length;
+  const defcon2=clients.filter(c=>getAutoStatus(c)==='amber').length;
+  const defcon1=clients.filter(c=>getAutoStatus(c)==='red').length;
+  document.getElementById('statsBar').innerHTML=`
+    <div class="stat-pill or"><div class="stat-pill-val">${total}</div><div class="stat-pill-label">Active Clients</div></div>
+    <div class="stat-pill" style="border-left:3px solid var(--or);"><div class="stat-pill-val">${totalBooks}</div><div class="stat-pill-label">Total Bookings</div></div>
+    <div class="stat-pill gr"><div class="stat-pill-val">${onTrack}</div><div class="stat-pill-label">On Track</div></div>
+    <div class="stat-pill am"><div class="stat-pill-val">${defcon2}</div><div class="stat-pill-label">DEFCON 2</div></div>
+    <div class="stat-pill re"><div class="stat-pill-val">${defcon1}</div><div class="stat-pill-label">DEFCON 1</div></div>`;
+}
+
+// ── FILTER / SORT ──────────────────────────────────────────────────────────────
+function setFilter(f,el){curFilter=f;document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderClients();}
+function getFiltered(){
+  const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
+  let list=clients.filter(c=>{
+    if(q&&!c.name.toLowerCase().includes(q)&&!(c.company||'').toLowerCase().includes(q)&&!(c.niche||'').toLowerCase().includes(q))return false;
+    if(curFilter==='on-track')return getAutoStatus(c)==='on-track';
+    if(curFilter==='amber')return getAutoStatus(c)==='amber';
+    if(curFilter==='red')return getAutoStatus(c)==='red';
+    if(curFilter==='invoice')return c.invState==='needs-send'||c.invState==='waiting';
+    return true;
+  });
+  const sort=document.getElementById('sortSel')?.value||'newest';
+  if(sort==='newest')list.sort((a,b)=>parseInt(b.id)-parseInt(a.id));
+  else if(sort==='oldest')list.sort((a,b)=>parseInt(a.id)-parseInt(b.id));
+  else if(sort==='bookings-hi')list.sort((a,b)=>(parseInt(b.current)||0)-(parseInt(a.current)||0));
+  else if(sort==='bookings-lo')list.sort((a,b)=>(parseInt(a.current)||0)-(parseInt(b.current)||0));
+  else if(sort==='status'){const o={red:0,amber:1,'on-track':2};list.sort((a,b)=>(o[getAutoStatus(a)]||2)-(o[getAutoStatus(b)]||2));}
+  else if(sort==='az')list.sort((a,b)=>(a.company||a.name).localeCompare(b.company||b.name));
+  return list;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────────
+function renderClients(){
+  renderStatsBar();
+  const list=document.getElementById('clientList');
+  const filtered=getFiltered();
+  if(!filtered.length){list.innerHTML='<div class="empty"><div class="empty-icon">📋</div><h3>No clients found</h3><p>Add your first client or adjust your search</p></div>';return;}
+  list.innerHTML=filtered.map(c=>renderRow(c)).join('');
+}
+
+function renderRow(c){
+  const isPPA=c.contractType==='ppa';
+  const dl=getDaysLeft(c),pct=getPct(c);
+  const status=getAutoStatus(c);
+  const sc=status==='red'?'s-re':status==='amber'?'s-am':'s-gr';
+  const statusBadge=status==='red'?'<span class="badge badge-re">🔴 DEFCON 1</span>':status==='amber'?'<span class="badge badge-am">🟡 DEFCON 2</span>':'<span class="badge badge-gr">✅ On Track</span>';
+  const ctBadge=isPPA?'<span class="badge badge-ppa">PPA</span>':'<span class="badge badge-pif">PIF</span>';
+  const ob=c.onboarding||[];
+  const obBadges=[ob.includes('needs')?'<span class="badge badge-ob-needs">📋 Needs Onboarding</span>':'',ob.includes('started')?'<span class="badge badge-ob-started">⚙️ Started</span>':'',ob.includes('live')?'<span class="badge badge-ob-live">🟢 Live</span>':''].join('');
+  const exp=expandedIds.has(c.id);
+  const progColor=pct>=100?'fill-gr':pct>=60?'fill-or':'fill-am';
+  const progHtml=`<div class="crow-prog"><div class="prog-label"><span>${pct}%</span><span>${c.current||0}/${c.target||'—'}</span></div><div class="prog-bar"><div class="prog-fill ${progColor}" style="width:${pct}%"></div></div></div>`;
+  const dColor=dl!==null&&dl<=7?'var(--re)':dl!==null&&dl<=14?'var(--am)':'var(--tx)';
+  const daysHtml=isPPA?`<div class="crow-stat crow-mid"><div class="crow-stat-val">£${c.perbooking||'—'}</div><div class="crow-stat-label">Per Appt</div></div>`:`<div class="crow-stat crow-mid"><div class="crow-stat-val" style="color:${dColor}">${dl!==null?dl+'d':'—'}</div><div class="crow-stat-label">Days Left</div></div>`;
+  const bookingCtrl=isPPA?`<div class="crow-booking-ctrl" onclick="event.stopPropagation()"><button class="bk-btn bk-minus" onclick="adjBooking('${c.id}',-1)">−</button><div class="bk-count">${c.current||0}</div><button class="bk-btn bk-plus" onclick="adjBooking('${c.id}',1)">+</button></div>`:`<div class="crow-stat crow-mid"><div class="crow-stat-val">${c.current||0}</div><div class="crow-stat-label">Bookings</div></div>`;
+  let invAlert='';
+  if(c.invState==='needs-send'){
+    invAlert=`<div class="inv-alert needs-send"><div class="inv-alert-txt">🔔 Invoice ready to send<span>${getInvoiceEvery(c)} bookings · £${c.invamt||'—'}</span></div><div style="display:flex;gap:8px;" onclick="event.stopPropagation()"><button class="btn btn-am btn-sm" onclick="sendInvoice('${c.id}')">Mark Sent ✓</button><button class="btn btn-ghost btn-sm" onclick="dismissInv('${c.id}')">Dismiss</button></div></div>`;
+  }else if(c.invState==='waiting'){
+    invAlert=`<div class="inv-alert waiting"><div class="inv-alert-txt">⏳ Awaiting payment<span>Sent ${c.invSentDate||''} · £${c.invamt||'—'}</span></div><div onclick="event.stopPropagation()"><button class="btn btn-gr btn-sm" onclick="markPaid('${c.id}')">Mark Paid ✓</button></div></div>`;
+  }else if(c.invState==='paid'){
+    invAlert=`<div class="inv-alert paid"><div class="inv-alert-txt">✅ Invoice paid<span>${c.invPaidDate||''} · £${c.invamt||'—'} · Next at ${(parseInt(c.lastInvoiceAt)||0)+getInvoiceEvery(c)} bookings</span></div></div>`;
+  }else if(isPPA&&c.invamt){
+    const every=getInvoiceEvery(c),lastAt=parseInt(c.lastInvoiceAt)||0,cur=parseInt(c.current)||0,rem=every-(cur-lastAt);
+    invAlert=`<div class="inv-alert neutral"><div class="inv-alert-txt" style="color:var(--t2);">📋 Invoice in ${Math.max(0,rem)} booking${rem===1?'':'s'}<span>Every ${every} · £${c.invamt}</span></div></div>`;
+  }else if(!isPPA){
+    const inv=c.inv_pif||'unpaid';
+    const ic=inv==='paid'?'paid':inv==='declined'?'declined':'waiting';
+    const il=inv==='paid'?'✅ Invoice paid':inv==='declined'?'❌ Declined':'⏳ Invoice pending';
+    invAlert=`<div class="inv-alert ${ic}"><div class="inv-alert-txt">${il}<span>£${c.totalfee||'—'} · ${c.terms||'—'}</span></div><div onclick="event.stopPropagation()" style="display:flex;gap:6px;">${inv!=='paid'?`<button class="btn btn-gr btn-sm" onclick="setInvPif('${c.id}','paid')">Mark Paid</button>`:''}<button class="btn btn-ghost btn-sm" onclick="setInvPif('${c.id}','unpaid')">Reset</button></div></div>`;
+  }
+  let expandedHtml='';
+  if(exp){
+    const bookings=c.bookings||[];
+    const months=lastNMonths(3);
+    const chartBars=months.map(mk=>{const cnt=bookings.filter(b=>getMonthKey(b.rawDate)===mk).length;return`<div class="mc-bar-wrap"><div class="mc-bar" style="height:${cnt?Math.max(6,cnt*12)+'px':'2px'};opacity:${cnt?'1':'.2'}"></div><div class="mc-label">${getMonthLabel(mk)}</div><div class="mc-val">${cnt||''}</div></div>`;}).join('');
+    const blogItems=bookings.length?bookings.map((b,i)=>`<div class="blog-entry"><span class="be-date">${b.date}</span><span class="be-note">${b.note||'Booking logged'}</span><span class="be-del" onclick="event.stopPropagation();delBooking('${c.id}',${i})">✕</span></div>`).join(''):'<div style="font-size:11px;color:var(--t3);padding:4px 0;">No bookings yet.</div>';
+    const contractInfo=isPPA?`
+      <div class="erow"><span class="erow-l">Setup Fee</span><span class="erow-r">£${c.setup||'0'}</span></div>
+      <div class="erow"><span class="erow-l">Per Booking</span><span class="erow-r">£${c.perbooking||'—'}</span></div>
+      <div class="erow"><span class="erow-l">Invoice Every</span><span class="erow-r">${getInvoiceEvery(c)} bookings</span></div>
+      <div class="erow"><span class="erow-l">Invoice Amount</span><span class="erow-r">£${c.invamt||'—'}</span></div>
+      <div class="erow"><span class="erow-l">Total Invoiced</span><span class="erow-r">£${c.totalInvoiced||'0'}</span></div>`:`
+      <div class="erow"><span class="erow-l">Total Fee</span><span class="erow-r">£${c.totalfee||'—'}</span></div>
+      <div class="erow"><span class="erow-l">Period</span><span class="erow-r">${c.period==='custom'?c.customDays:c.period} days</span></div>
+      <div class="erow"><span class="erow-l">Start Date</span><span class="erow-r">${c.startDate||'—'}</span></div>
+      <div class="erow"><span class="erow-l">Days Left</span><span class="erow-r" style="color:${dColor}">${dl!==null?dl+' days':'—'}</span></div>
+      <div class="erow"><span class="erow-l">Terms</span><span class="erow-r">${c.terms||'—'}</span></div>
+      <div class="erow"><span class="erow-l">Invoice</span><span class="erow-r">${c.inv_pif==='paid'?'✅ Paid':c.inv_pif==='declined'?'❌ Declined':'⏳ Pending'}</span></div>`;
+    expandedHtml=`<div class="crow-expanded open" onclick="event.stopPropagation()">
+      <div class="exp-grid">
+        <div class="exp-section"><div class="exp-title">Client Info</div>
+          <div class="erow"><span class="erow-l">Name</span><span class="erow-r">${c.name}</span></div>
+          <div class="erow"><span class="erow-l">Company</span><span class="erow-r">${c.company||'—'}</span></div>
+          <div class="erow"><span class="erow-l">Niche</span><span class="erow-r">${c.niche||'—'}</span></div>
+          <div class="erow"><span class="erow-l">Postcode</span><span class="erow-r">${c.postcode||'—'}</span></div>
+          <div class="erow"><span class="erow-l">Radius</span><span class="erow-r">${c.radius||'—'} mi</span></div>
+        </div>
+        <div class="exp-section"><div class="exp-title">Contract</div>${contractInfo}</div>
+        <div class="exp-section"><div class="exp-title">3-Month Trend</div><div class="month-chart">${chartBars}</div></div>
+        ${c.prefs?`<div class="exp-section"><div class="exp-title">Booking Preferences</div><div style="font-size:12px;color:var(--t2);line-height:1.65;white-space:pre-wrap;">${c.prefs}</div></div>`:''}
+        ${c.notes?`<div class="exp-section"><div class="exp-title">Setter Notes</div><div style="font-size:12px;color:var(--t2);line-height:1.65;white-space:pre-wrap;">${c.notes}</div></div>`:''}
+        <div class="exp-section full"><div class="exp-title">📅 Booking Log (${bookings.length})</div>
+          <div class="blog-add"><input id="bn_${c.id}" placeholder="Note — name, area, job type..." onkeydown="if(event.key==='Enter')logBooking('${c.id}')"><button class="btn btn-or btn-sm" onclick="logBooking('${c.id}')">+ Log Booking</button></div>
+          <div id="bl_${c.id}">${blogItems}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;padding-top:14px;border-top:1px solid var(--b1);flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="openEdit('${c.id}')">Edit Client</button>
+        <button class="btn btn-re btn-sm" onclick="deleteClient('${c.id}')">Delete Client</button>
+        ${!isPPA?`<button class="btn btn-ghost btn-sm" onclick="setInvPif('${c.id}','paid')">Mark Invoice Paid</button>`:''}
+        ${!isPPA?`<button class="btn btn-ghost btn-sm" onclick="setInvPif('${c.id}','unpaid')">Reset Invoice</button>`:''}
+      </div>
+    </div>`;
+  }
+  return`<div class="client-row ${sc}" onclick="toggleExpand('${c.id}')">
+    <div class="crow-main">
+      <div>
+        <div class="crow-name">${c.company||c.name}</div>
+        <div class="crow-company">${c.company?c.name:c.niche||'—'}</div>
+        <div class="crow-badge-wrap">${statusBadge}${ctBadge}${obBadges}${c.stripeId||c.stripeIdPif?'<span class="badge badge-pu">⚡ Stripe</span>':''}</div>
+      </div>
+      ${bookingCtrl}
+      <div class="crow-stat crow-mid"><div class="crow-stat-val">${c.target||'—'}</div><div class="crow-stat-label">Target</div></div>
+      ${daysHtml}
+      <div class="crow-prog crow-mid">${progHtml}</div>
+      <div><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openEdit('${c.id}')">Edit</button></div>
+    </div>
+    ${invAlert}
+    ${expandedHtml}
+  </div>`;
+}
+
+function toggleExpand(id){if(expandedIds.has(id))expandedIds.delete(id);else expandedIds.add(id);renderClients();}
+
+// ── BOOKINGS ───────────────────────────────────────────────────────────────────
+function logBooking(id){
+  const c=clients.find(x=>x.id===id);if(!c)return;
+  const el=document.getElementById('bn_'+id);
+  const note=el?el.value.trim():'';
+  if(!c.bookings)c.bookings=[];
+  c.bookings.unshift({date:nowDateStr(),note,rawDate:new Date().toISOString()});
+  c.current=(parseInt(c.current)||0)+1;
+  if(el)el.value='';
+  checkAndTriggerInvoice(c);
+  save();renderClients();toast('Booking logged','s');
+}
+function adjBooking(id,d){
+  const c=clients.find(x=>x.id===id);if(!c)return;
+  c.current=Math.max(0,(parseInt(c.current)||0)+d);
+  if(d>0)checkAndTriggerInvoice(c);
+  save();renderClients();toast('Bookings: '+c.current,'s');
+}
+function delBooking(id,i){
+  const c=clients.find(x=>x.id===id);if(!c||!c.bookings)return;
+  c.bookings.splice(i,1);c.current=Math.max(0,(parseInt(c.current)||0)-1);
+  save();renderClients();toast('Booking removed','i');
+}
+
+// ── INVOICE ────────────────────────────────────────────────────────────────────
+function checkAndTriggerInvoice(c){if(c.contractType!=='ppa')return;if(checkInvoiceTrigger(c))c.invState='needs-send';}
+function sendInvoice(id){const c=clients.find(x=>x.id===id);if(!c)return;c.invState='waiting';c.invSentDate=nowDateStr();c.lastInvoiceAt=parseInt(c.current)||0;save();renderClients();toast('Invoice marked as sent','i');}
+function markPaid(id){const c=clients.find(x=>x.id===id);if(!c)return;c.invState='paid';c.invPaidDate=nowDateStr();c.totalInvoiced=(parseFloat(c.totalInvoiced)||0)+(parseFloat(c.invamt)||0);save();renderClients();toast('Invoice paid!','s');}
+function dismissInv(id){const c=clients.find(x=>x.id===id);if(!c)return;c.invState='dismissed';c.lastInvoiceAt=parseInt(c.current)||0;save();renderClients();}
+function setInvPif(id,s){const c=clients.find(x=>x.id===id);if(!c)return;c.inv_pif=s;save();renderClients();toast('Invoice: '+s,'s');}
+
+// ── STATS ──────────────────────────────────────────────────────────────────────
+function renderStats(){
+  const n=parseInt(document.getElementById('statsPeriod')?.value||'6');
+  const months=lastNMonths(n);
+  if(!clients.length){document.getElementById('statsContent').innerHTML='<div class="empty"><div class="empty-icon">📊</div><h3>No clients yet</h3></div>';return;}
+  const monthTotals=months.map(mk=>({key:mk,label:getMonthLabel(mk),total:clients.reduce((a,c)=>(a+(c.bookings||[]).filter(b=>getMonthKey(b.rawDate)===mk).length),0)}));
+  const maxTotal=Math.max(...monthTotals.map(m=>m.total),1);
+  const clientRows=clients.map(c=>{
+    const mData=months.map(mk=>(c.bookings||[]).filter(b=>getMonthKey(b.rawDate)===mk).length);
+    const maxC=Math.max(...mData,1);
+    const bars=mData.map(v=>`<div class="cmr-bar" style="height:${v?Math.max(4,Math.round((v/maxC)*40))+'px':'2px'};opacity:${v?'0.85':'0.15'}"></div>`).join('');
+    const total=mData.reduce((a,b)=>a+b,0);
+    const st=getAutoStatus(c);
+    return`<div class="client-month-row"><div class="cmr-name" style="border-left:2px solid ${st==='red'?'var(--re)':st==='amber'?'var(--am)':'var(--gr)'};padding-left:8px;">${c.company||c.name}<div style="font-size:10px;color:var(--t3);margin-top:2px;">${c.niche||''}</div></div><div class="cmr-bars">${bars}</div><div class="cmr-total">${total}</div></div>`;
+  }).join('');
+  const overallBars=monthTotals.map(m=>`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;"><div style="font-size:11px;color:var(--t2);font-family:'DM Mono',monospace;">${m.total||''}</div><div style="width:100%;background:var(--or);border-radius:3px 3px 0 0;height:${m.total?Math.max(6,Math.round((m.total/maxTotal)*80))+'px':'3px'};opacity:${m.total?'1':'.2'};"></div><div style="font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;">${m.label}</div></div>`).join('');
+  document.getElementById('statsContent').innerHTML=`<div class="stats-overview"><div class="so-card" style="grid-column:1/-1;"><div class="so-title">Total Bookings — All Clients</div><div style="display:flex;align-items:flex-end;gap:6px;height:100px;">${overallBars}</div></div><div class="so-card" style="grid-column:1/-1;"><div class="so-title">Bookings Per Client (${n} months)</div><div style="display:flex;font-size:9px;color:var(--t3);padding:0 0 6px 142px;gap:3px;">${months.map(mk=>`<div style="flex:1;text-align:center;">${getMonthLabel(mk)}</div>`).join('')}<div style="width:30px;text-align:right;">TOT</div></div>${clientRows}</div></div>`;
+}
+
+// ── ADD / EDIT ─────────────────────────────────────────────────────────────────
+function openAdd(){editId=null;document.getElementById('moClientTitle').textContent='Add New Client';clearForm();selContract('ppa');document.getElementById('moClient').classList.add('open');}
+function openEdit(id){const c=clients.find(x=>x.id===id);if(!c)return;editId=id;document.getElementById('moClientTitle').textContent='Edit Client';fillForm(c);document.getElementById('moClient').classList.add('open');}
+function clearForm(){
+  ['f_name','f_company','f_niche','f_postcode','f_radius','f_target','f_current','f_prefs','f_setup','f_perbooking','f_monthlytarget','f_ppa_startdate','f_invamt','f_stripe_ppa','f_totalfee','f_customdays','f_startdate','f_stripe_pif','f_notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=id==='f_current'?'0':'';});
+  document.getElementById('f_status').value='auto';
+  document.getElementById('f_invevery').value='5';
+  document.getElementById('f_period').value='90';
+  document.getElementById('f_terms').value='upfront';
+  document.getElementById('f_renewal').value='none';
+  document.getElementById('f_inv_pif').value='unpaid';
+  document.getElementById('f_invCW').style.display='none';
+  document.getElementById('f_cdw').style.display='none';
+  ['needs','started','live'].forEach(k=>document.getElementById('ob-'+k)?.classList.remove('sel'));
+}
+function fillForm(c){
+  clearForm();
+  const s=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined&&v!==null)el.value=v;};
+  s('f_name',c.name);s('f_company',c.company);s('f_niche',c.niche);s('f_postcode',c.postcode);s('f_radius',c.radius);s('f_status',c.status||'auto');s('f_target',c.target);s('f_current',c.current||0);s('f_prefs',c.prefs);s('f_notes',c.notes);
+  (c.onboarding||[]).forEach(k=>document.getElementById('ob-'+k)?.classList.add('sel'));
+  selContract(c.contractType||'ppa');
+  if(c.contractType==='ppa'){s('f_setup',c.setup);s('f_perbooking',c.perbooking);s('f_monthlytarget',c.monthlyTarget);s('f_ppa_startdate',c.ppaStartDate);s('f_invevery',c.invEvery||'5');s('f_invamt',c.invamt);s('f_stripe_ppa',c.stripeId);if(c.invEvery==='custom'){document.getElementById('f_invCW').style.display='flex';s('f_invCustom',c.invCustom);}}
+  else{s('f_totalfee',c.totalfee);s('f_period',c.period);s('f_customdays',c.customDays);s('f_startdate',c.startDate);s('f_terms',c.terms);s('f_renewal',c.renewal);s('f_inv_pif',c.inv_pif);s('f_stripe_pif',c.stripeIdPif);if(c.period==='custom')document.getElementById('f_cdw').style.display='block';}
+}
+function toggleOb(k){document.getElementById('ob-'+k)?.classList.toggle('sel');}
+function selContract(t){
+  curContract=t;
+  document.getElementById('opt-ppa').classList.toggle('sel',t==='ppa');
+  document.getElementById('opt-pif').classList.toggle('sel',t==='pif');
+  document.getElementById('ppa-fields').style.display=t==='ppa'?'contents':'none';
+  document.getElementById('pif-fields').style.display=t==='pif'?'block':'none';
+}
+function saveClient(){
+  const name=document.getElementById('f_name').value.trim();
+  if(!name){toast('Client name required','e');return;}
+  const g=id=>document.getElementById(id)?.value||'';
+  const ex=editId?clients.find(c=>c.id===editId):null;
+  const onboarding=['needs','started','live'].filter(k=>document.getElementById('ob-'+k)?.classList.contains('sel'));
+  const cl={
+    id:editId||Date.now().toString(),name,
+    company:g('f_company'),niche:g('f_niche'),
+    postcode:g('f_postcode').toUpperCase().trim(),radius:g('f_radius'),
+    status:g('f_status'),target:g('f_target'),current:g('f_current'),
+    prefs:g('f_prefs'),notes:g('f_notes'),onboarding,
+    contractType:curContract,bookings:ex?.bookings||[],
+    invState:ex?.invState||null,invSentDate:ex?.invSentDate||null,
+    invPaidDate:ex?.invPaidDate||null,lastInvoiceAt:ex?.lastInvoiceAt||0,
+    totalInvoiced:ex?.totalInvoiced||0,
+    setup:g('f_setup'),perbooking:g('f_perbooking'),invEvery:g('f_invevery'),
+    monthlyTarget:g('f_monthlytarget'),ppaStartDate:g('f_ppa_startdate'),
+    invCustom:g('f_invCustom'),invamt:g('f_invamt'),stripeId:g('f_stripe_ppa'),
+    totalfee:g('f_totalfee'),period:g('f_period'),customDays:g('f_customdays'),
+    startDate:g('f_startdate'),terms:g('f_terms'),renewal:g('f_renewal'),
+    inv_pif:g('f_inv_pif'),stripeIdPif:g('f_stripe_pif'),
+  };
+  if(editId){const i=clients.findIndex(c=>c.id===editId);if(i!==-1)clients[i]=cl;}
+  else clients.push(cl);
+  save();renderClients();closeMo('moClient');toast(editId?'Client updated':'Client added','s');
+}
+function deleteClient(id){
+  if(!confirm('Delete this client?'))return;
+  clients=clients.filter(c=>c.id!==id);expandedIds.delete(id);
+  save();renderClients();toast('Deleted','i');
+}
+
+// ── DISTANCE ───────────────────────────────────────────────────────────────────
+let distMode='miles';
+let mapsKey=localStorage.getItem('ks_maps')||'';
+function setDistMode(m,el){distMode=m;document.querySelectorAll('.dist-mode-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');const w=document.getElementById('mapsKeyWrap');if(w)w.style.display=m==='time'?'block':'none';document.getElementById('distResults').innerHTML='';}
+function saveMapsKey(){const v=document.getElementById('mapsKeyInput')?.value.trim();if(!v)return;mapsKey=v;localStorage.setItem('ks_maps',v);toast('Maps key saved','s');}
+async function checkDist(){
+  const pc=document.getElementById('leadPC').value.trim().toUpperCase();
+  const err=document.getElementById('distErr'),res=document.getElementById('distResults');
+  if(!pc){err.textContent='Enter a postcode';err.style.display='block';return;}
+  err.style.display='none';
+  if(distMode==='time'&&!mapsKey){err.textContent='Add your Google Maps API key above.';err.style.display='block';return;}
+  res.innerHTML=`<div style="text-align:center;padding:40px;color:var(--t2);"><span class="sp"></span><div style="margin-top:10px;font-size:12px;">Looking up...</div></div>`;
+  let lc;
+  try{const r=await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(pc)}`);const d=await r.json();if(d.status!==200)throw new Error();lc={lat:d.result.latitude,lng:d.result.longitude};}
+  catch(e){err.textContent='Postcode not found.';err.style.display='block';res.innerHTML='';return;}
+  if(!clients.length){res.innerHTML='<div class="empty"><div class="empty-icon">📋</div><h3>No clients added yet</h3></div>';return;}
+  const wc=await Promise.all(clients.map(async c=>{
+    if(!c.postcode)return{...c,dist:null};
+    try{const r=await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(c.postcode)}`);const d=await r.json();if(d.status!==200)return{...c,dist:null};return{...c,lat:d.result.latitude,lng:d.result.longitude,dist:hav(lc.lat,lc.lng,d.result.latitude,d.result.longitude)};}
+    catch(e){return{...c,dist:null};}
+  }));
+  if(distMode==='time'){
+    const valid=wc.filter(c=>c.lat!=null);
+    for(let i=0;i<valid.length;i+=10){
+      const batch=valid.slice(i,i+10);
+      const dests=batch.map(c=>`${c.lat},${c.lng}`).join('|');
+      try{const r=await fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${lc.lat},${lc.lng}&destinations=${encodeURIComponent(dests)}&mode=driving&key=${mapsKey}`);const d=await r.json();if(d.status==='OK'&&d.rows[0])d.rows[0].elements.forEach((el,j)=>{if(el.status==='OK'){batch[j].driveSeconds=el.duration.value;batch[j].driveText=el.duration.text;batch[j].distText=el.distance.text;}});}catch(e){}
+    }
+  }
+  const sorted=wc.sort((a,b)=>(distMode==='time'?(a.driveSeconds??99999)-(b.driveSeconds??99999):(a.dist??999)-(b.dist??999)));
+  const inR=sorted.filter(c=>c.dist!==null&&c.radius&&c.dist<=parseFloat(c.radius));
+  const outR=sorted.filter(c=>c.dist===null||!c.radius||c.dist>parseFloat(c.radius));
+  let html='';
+  if(inR.length)html+=`<div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-bottom:10px;">In Range (${inR.length})</div><div class="dist-grid" style="margin-bottom:20px;">`+inR.map(c=>dCard(c,true)).join('')+'</div>';
+  if(outR.length)html+=`<div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px;">Out of Range (${outR.length})</div><div class="dist-grid">`+outR.map(c=>dCard(c,false)).join('')+'</div>';
+  res.innerHTML=html;
+}
+function dCard(c,inR){
+  const mainVal=distMode==='time'?(c.driveText||'—'):(c.dist!==null?c.dist.toFixed(1)+'mi':'?');
+  const sub=distMode==='time'&&c.distText?c.distText:'';
+  return`<div class="dist-card ${inR?'inr':'outr'}"><div class="dist-ico ${inR?'in':'out'}">${inR?'✅':'❌'}</div><div class="dist-info"><div class="dist-name">${c.company||c.name}</div><div class="dist-detail">${c.postcode} · ${c.radius||'?'}mi radius</div></div><div class="dist-mi ${inR?'in':'out'}" style="font-size:${distMode==='time'?'13':'16'}px;">${mainVal}${sub?`<div style="font-size:9px;font-weight:400;color:var(--t3);">${sub}</div>`:''}</div></div>`;
+}
+function hav(a,b,c,d){const R=3958.8,dl=(c-a)*Math.PI/180,dn=(d-b)*Math.PI/180,x=Math.sin(dl/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dn/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+
+function closeMo(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
+function toast(m,t='s'){const x=document.getElementById('toast');x.textContent=m;x.className=`toast ${t} show`;setTimeout(()=>x.classList.remove('show'),3000);}
+</script>
+</body>
+</html>
