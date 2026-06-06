@@ -311,6 +311,8 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
       <div id="ppa-fields" style="display:contents;">
         <div class="fgrp"><label class="fl">Setup Fee £</label><input class="fi" id="f_setup" type="number" placeholder="e.g. 500"></div>
         <div class="fgrp"><label class="fl">Per Qualified Booking £</label><input class="fi" id="f_perbooking" type="number" placeholder="e.g. 150"></div>
+        <div class="fgrp"><label class="fl">Monthly Booking Target</label><input class="fi" id="f_monthlytarget" type="number" placeholder="e.g. 8 per month"></div>
+        <div class="fgrp"><label class="fl">Contract Start Date</label><input class="fi" id="f_ppa_startdate" type="date"></div>
         <div class="fgrp full"><label class="fl">Send Invoice Every (bookings)</label>
           <div style="display:flex;gap:8px;">
             <select class="fs" id="f_invevery" style="flex:1;" onchange="document.getElementById('f_invCW').style.display=this.value==='custom'?'flex':'none'">
@@ -378,6 +380,19 @@ window.addEventListener('load',()=>{
   loadData();
 });
 
+// Pre-loaded client data
+const SEED_CLIENTS=[
+  {id:'1000000001',name:'Gabriel Talase',company:'Gabriel Maintenance Pro',niche:'Bathrooms',postcode:'NW90BB',radius:'15',status:'auto',target:'50',current:'32',contractType:'pif',period:'180',startDate:'2026-02-14',totalfee:'4000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'Open to most timings - now focused more on quality rather than quantity',bookings:[]},
+  {id:'1000000002',name:'Sandel Musca',company:'MBT Group',niche:'Bathrooms',postcode:'EC1V2NX',radius:'15',status:'auto',target:'25',current:'11',contractType:'pif',period:'90',startDate:'2026-04-05',totalfee:'2000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'Gets lots of lead flow so can mass book',bookings:[]},
+  {id:'1000000003',name:'Robert Nagy',company:'Marilyns Kitchens',niche:'Kitchens',postcode:'OX262BE',radius:'20',status:'auto',target:'25',current:'10',contractType:'pif',period:'90',startDate:'2026-03-20',totalfee:'2000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'More of an urgency - they no show some bookings',bookings:[]},
+  {id:'1000000004',name:'Tom Millin',company:'Fluent Ads',niche:'Architectural',postcode:'TW166SB',radius:'15',status:'auto',target:'30',current:'13',contractType:'pif',period:'150',startDate:'2026-03-30',totalfee:'750',terms:'monthly',inv_pif:'paid',onboarding:['live'],prefs:'Book in advice calls which then turn into at home consultations. Main priority right now is having people with a close timeline and also within their service area',bookings:[]},
+  {id:'1000000005',name:'Marcin Maciula',company:'MM Building Services',niche:'Extensions',postcode:'SM51TS',radius:'18',status:'auto',target:'20',current:'8',contractType:'pif',period:'90',startDate:'2026-04-10',totalfee:'2000',terms:'split',inv_pif:'paid',onboarding:['live'],prefs:'Struggles on sales - big on location and service area',bookings:[]},
+  {id:'1000000006',name:'Yusuf and Tausif Darbar',company:'Fixzen Services',niche:'Extensions',postcode:'E78HQ',radius:'15',status:'auto',target:'20',current:'6',contractType:'ppa',setup:'1000',perbooking:'125',invEvery:'5',invamt:'625',monthlyTarget:'',ppaStartDate:'',onboarding:['live'],prefs:'Can only do some specific times - timeline big problem with them. They also no show bookings',bookings:[]},
+  {id:'1000000007',name:'Harry Brook',company:'Rune Construction',niche:'Kitchens',postcode:'TN389EY',radius:'20',status:'auto',target:'20',current:'8',contractType:'pif',period:'90',startDate:'2026-04-28',totalfee:'2000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'Will travel further for jobs',notes:'Ads are currently off so no more leads will be coming in at the moment',bookings:[]},
+  {id:'1000000008',name:'Umair Zahid',company:'Kabilo Ltd',niche:'Bathrooms',postcode:'E176QN',radius:'15',status:'auto',target:'25',current:'7',contractType:'pif',period:'90',startDate:'2026-05-11',totalfee:'2000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'Has multiple people that can go out and do the site visits. Can handle all projects so possibly lead share with other companies',bookings:[]},
+  {id:'1000000009',name:'Chris Smith',company:'Smiths Kitchens',niche:'Kitchens',postcode:'RH203DD',radius:'20',status:'auto',target:'25',current:'0',contractType:'ppa',setup:'1000',perbooking:'100',invEvery:'5',invamt:'500',monthlyTarget:'',ppaStartDate:'',onboarding:['live'],prefs:'Serious trust issues - new client so load with bookings',bookings:[]},
+];
+
 function switchTab(t,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
@@ -394,6 +409,8 @@ function save(){
 
 function loadData(){
   try{const raw=localStorage.getItem('ks_d');if(raw){const p=JSON.parse(raw);clients=p.clients||[];}}catch(e){clients=[];}
+  // If no clients yet, use seed data
+  if(clients.length===0)clients=SEED_CLIENTS.map(c=>({...c}));
   const t=localStorage.getItem('ks_at');
   if(t){aToken=t;driveOn=true;updateSyncUI(true);loadDrive();}
   else{renderClients();renderStatsBar();}
@@ -526,7 +543,8 @@ function checkInvoiceTrigger(c){
 }
 function getAutoStatus(c){
   if(c.status&&c.status!=='auto')return c.status;
-  const current=parseInt(c.current)||0,target=parseInt(c.target)||0;
+  const current=parseInt(c.current)||0;
+  const target=parseInt(c.target)||0;
   if(!target)return'on-track';
   const bookingPct=Math.min(100,(current/target)*100);
   if(c.contractType==='pif'&&c.startDate){
@@ -535,6 +553,17 @@ function getAutoStatus(c){
     const timePct=Math.min(100,(elapsed/totalDays)*100);
     const gap=timePct-bookingPct;
     if(gap>25)return'red';if(gap>10)return'amber';return'on-track';
+  }else if(c.contractType==='ppa'&&c.ppaStartDate&&c.monthlyTarget){
+    // PPA with monthly target — check if on pace
+    const monthlyTarget=parseInt(c.monthlyTarget)||0;
+    const start=new Date(c.ppaStartDate);
+    const now=new Date();
+    const monthsElapsed=Math.max(0.1,(now-start)/(1000*60*60*24*30.44));
+    const expectedByNow=monthlyTarget*monthsElapsed;
+    const gap=expectedByNow-current;
+    if(gap>monthlyTarget*0.5)return'red';
+    if(gap>monthlyTarget*0.2)return'amber';
+    return'on-track';
   }else{
     if(bookingPct>=75)return'on-track';if(bookingPct>=40)return'amber';return'red';
   }
@@ -735,7 +764,7 @@ function renderStats(){
 function openAdd(){editId=null;document.getElementById('moClientTitle').textContent='Add New Client';clearForm();selContract('ppa');document.getElementById('moClient').classList.add('open');}
 function openEdit(id){const c=clients.find(x=>x.id===id);if(!c)return;editId=id;document.getElementById('moClientTitle').textContent='Edit Client';fillForm(c);document.getElementById('moClient').classList.add('open');}
 function clearForm(){
-  ['f_name','f_company','f_niche','f_postcode','f_radius','f_target','f_current','f_prefs','f_setup','f_perbooking','f_invamt','f_stripe_ppa','f_totalfee','f_customdays','f_startdate','f_stripe_pif','f_notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=id==='f_current'?'0':'';});
+  ['f_name','f_company','f_niche','f_postcode','f_radius','f_target','f_current','f_prefs','f_setup','f_perbooking','f_monthlytarget','f_ppa_startdate','f_invamt','f_stripe_ppa','f_totalfee','f_customdays','f_startdate','f_stripe_pif','f_notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=id==='f_current'?'0':'';});
   document.getElementById('f_status').value='auto';
   document.getElementById('f_invevery').value='5';
   document.getElementById('f_period').value='90';
@@ -752,7 +781,7 @@ function fillForm(c){
   s('f_name',c.name);s('f_company',c.company);s('f_niche',c.niche);s('f_postcode',c.postcode);s('f_radius',c.radius);s('f_status',c.status||'auto');s('f_target',c.target);s('f_current',c.current||0);s('f_prefs',c.prefs);s('f_notes',c.notes);
   (c.onboarding||[]).forEach(k=>document.getElementById('ob-'+k)?.classList.add('sel'));
   selContract(c.contractType||'ppa');
-  if(c.contractType==='ppa'){s('f_setup',c.setup);s('f_perbooking',c.perbooking);s('f_invevery',c.invEvery||'5');s('f_invamt',c.invamt);s('f_stripe_ppa',c.stripeId);if(c.invEvery==='custom'){document.getElementById('f_invCW').style.display='flex';s('f_invCustom',c.invCustom);}}
+  if(c.contractType==='ppa'){s('f_setup',c.setup);s('f_perbooking',c.perbooking);s('f_monthlytarget',c.monthlyTarget);s('f_ppa_startdate',c.ppaStartDate);s('f_invevery',c.invEvery||'5');s('f_invamt',c.invamt);s('f_stripe_ppa',c.stripeId);if(c.invEvery==='custom'){document.getElementById('f_invCW').style.display='flex';s('f_invCustom',c.invCustom);}}
   else{s('f_totalfee',c.totalfee);s('f_period',c.period);s('f_customdays',c.customDays);s('f_startdate',c.startDate);s('f_terms',c.terms);s('f_renewal',c.renewal);s('f_inv_pif',c.inv_pif);s('f_stripe_pif',c.stripeIdPif);if(c.period==='custom')document.getElementById('f_cdw').style.display='block';}
 }
 function toggleOb(k){document.getElementById('ob-'+k)?.classList.toggle('sel');}
@@ -780,6 +809,7 @@ function saveClient(){
     invPaidDate:ex?.invPaidDate||null,lastInvoiceAt:ex?.lastInvoiceAt||0,
     totalInvoiced:ex?.totalInvoiced||0,
     setup:g('f_setup'),perbooking:g('f_perbooking'),invEvery:g('f_invevery'),
+    monthlyTarget:g('f_monthlytarget'),ppaStartDate:g('f_ppa_startdate'),
     invCustom:g('f_invCustom'),invamt:g('f_invamt'),stripeId:g('f_stripe_ppa'),
     totalfee:g('f_totalfee'),period:g('f_period'),customDays:g('f_customdays'),
     startDate:g('f_startdate'),terms:g('f_terms'),renewal:g('f_renewal'),
