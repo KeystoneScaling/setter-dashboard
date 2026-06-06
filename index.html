@@ -22,6 +22,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 .hbtn.on-s{color:var(--pu);border-color:rgba(167,139,250,.35);}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--t3);}
 .hbtn.on .dot{background:var(--gr);box-shadow:0 0 5px var(--gr);}
+.sync-status{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;}
 .tabs{display:flex;padding:0 24px;border-bottom:1px solid var(--b1);background:var(--s1);}
 .tab{padding:12px 16px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;}
 .tab:hover{color:var(--t2);}.tab.active{color:var(--or);border-bottom-color:var(--or);}
@@ -110,11 +111,6 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 .mc-bar{width:100%;background:var(--or);border-radius:2px 2px 0 0;min-height:2px;transition:height .3s;}
 .mc-label{font-size:9px;color:var(--t3);font-family:'DM Mono',monospace;}
 .mc-val{font-size:9px;color:var(--t2);font-family:'DM Mono',monospace;}
-.si-card{background:var(--s3);border-radius:var(--r2);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-.si-card.paid{border-left:3px solid var(--gr);}.si-card.open{border-left:3px solid var(--am);}.si-card.void,.si-card.draft{border-left:3px solid var(--t3);opacity:.6;}
-.si-num{font-size:11px;font-weight:700;font-family:'DM Mono',monospace;}.si-meta{font-size:10px;color:var(--t3);margin-top:1px;}
-.si-badge{padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
-.si-badge.paid{background:rgba(74,222,128,.1);color:var(--gr);}.si-badge.open{background:rgba(245,158,11,.1);color:var(--am);}.si-badge.void,.si-badge.draft{background:rgba(85,85,85,.2);color:var(--t3);}
 .ob-tog{display:flex;gap:8px;margin-top:2px;}
 .ob-opt{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer;transition:all .18s;text-align:center;}
 .ob-opt:hover{border-color:var(--b2);}.ob-opt.sel{border-color:var(--or);background:var(--ord);}
@@ -166,11 +162,6 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 .dist-info{flex:1;}.dist-name{font-size:12px;font-weight:700;}.dist-detail{font-size:10px;color:var(--t2);margin-top:2px;font-family:'DM Mono',monospace;}
 .dist-mi{font-size:16px;font-weight:800;font-family:'DM Mono',monospace;text-align:right;}
 .dist-mi.in{color:var(--gr);}.dist-mi.out{color:var(--re);}
-.dmc{text-align:center;padding:6px 0;}
-.gbtn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;background:#fff;color:#333;border:none;border-radius:var(--r2);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin:0 auto 10px;transition:all .2s;width:100%;max-width:260px;}
-.gbtn:hover{background:#f0f0f0;}
-.lbtn{display:block;width:100%;max-width:260px;margin:0 auto;padding:8px;background:transparent;border:1px solid var(--b1);border-radius:var(--r2);color:var(--t3);font-family:'Syne',sans-serif;font-size:11px;cursor:pointer;transition:all .2s;}
-.lbtn:hover{border-color:var(--b2);color:var(--t2);}
 .sp{width:15px;height:15px;border:2px solid var(--b1);border-top-color:var(--or);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .toast{position:fixed;bottom:20px;right:20px;background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);padding:10px 15px;font-size:12px;font-weight:600;color:var(--tx);z-index:9999;transform:translateY(60px);opacity:0;transition:all .25s;}
@@ -184,8 +175,9 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 <header class="hdr">
   <div class="logo">Keystone <span>Setters</span></div>
   <div class="hdr-r">
+    <span class="sync-status" id="syncStatus"></span>
+    <button class="hbtn on" id="syncBtn" onclick="manualSync()"><span class="dot" style="background:var(--gr);box-shadow:0 0 5px var(--gr);"></span><span id="syncLbl">GitHub Sync</span></button>
     <button class="hbtn" id="sBtn" onclick="openStripeModal()">⚡ <span id="sLbl">Stripe</span></button>
-    <button class="hbtn" id="dBtn" onclick="openDriveModal()"><span class="dot" id="dDot"></span><span id="dLbl">Connect Drive</span></button>
     <button class="btn btn-or" style="font-size:11px;" onclick="openAdd()">+ Add Client</button>
   </div>
 </header>
@@ -241,13 +233,12 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
       </div>
       <div id="mapsKeyWrap" style="display:none;margin:12px auto;max-width:420px;">
         <div style="background:rgba(255,106,0,.08);border:1px solid rgba(255,106,0,.25);border-radius:var(--r2);padding:10px 13px;font-size:11px;color:var(--t2);text-align:left;margin-bottom:8px;">
-          ⚡ Drive time requires a <strong style="color:var(--tx);">Google Maps API key</strong>. Get one free at <strong style="color:var(--or);">console.cloud.google.com</strong> → APIs → Distance Matrix API → Credentials.
+          ⚡ Drive time needs a <strong style="color:var(--tx);">Google Maps API key</strong> — console.cloud.google.com → Distance Matrix API → Credentials.
         </div>
         <div style="display:flex;gap:8px;">
           <input class="fi" id="mapsKeyInput" type="password" placeholder="AIza..." style="flex:1;font-size:12px;">
           <button class="btn btn-or" style="white-space:nowrap;" onclick="saveMapsKey()">Save Key</button>
         </div>
-        <div id="mapsKeyStatus" style="font-size:10px;color:var(--t3);margin-top:5px;"></div>
       </div>
       <div class="dist-row" style="margin-top:14px;">
         <input class="fi" id="leadPC" placeholder="e.g. M1 1AE" maxlength="10" onkeydown="if(event.key==='Enter')checkDist()">
@@ -259,23 +250,6 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
   </div>
 </main>
 <div class="toast" id="toast"></div>
-
-<!-- DRIVE MODAL -->
-<div class="mo" id="moDrive">
-  <div class="md" style="max-width:380px;">
-    <button class="md-x" onclick="closeMo('moDrive')">✕</button>
-    <div class="dmc">
-      <div style="font-size:42px;margin-bottom:12px;">☁️</div>
-      <div style="font-size:16px;font-weight:800;margin-bottom:6px;">Connect Google Drive</div>
-      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px;">Sign in once — data syncs across every browser and device.</div>
-      <button class="gbtn" onclick="signInGoogle()">
-        <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
-        Sign in with Google
-      </button>
-      <button class="lbtn" onclick="useLocal()">Use local storage only</button>
-    </div>
-  </div>
-</div>
 
 <!-- STRIPE MODAL -->
 <div class="mo" id="moStripe">
@@ -374,9 +348,14 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 
 <script>
 let clients=[],editId=null,curContract='ppa',curFilter='all';
-let driveOn=false,driveFileId=null,aToken=null,stripeKey=null;
-let expandedIds=new Set();
-const DFILE='ks-setters-v2.json',GCL='234293704596-h0cvhdl9nffm335bamnlk7251b1dtcbi.apps.googleusercontent.com';
+let stripeKey=null,expandedIds=new Set();
+let syncTimeout=null,lastSyncTime=0;
+
+// GitHub config — data saved as JSON file in your repo
+const GH_TOKEN='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';
+const GH_REPO='keystonescaling/setter-dashboard';
+const GH_FILE='ks-data.json';
+const GH_API=`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
 
 window.addEventListener('load',()=>{
   stripeKey=localStorage.getItem('ks_sk')||null;
@@ -392,109 +371,71 @@ function switchTab(t,el){
   if(t==='stats')renderStats();
 }
 
-// ── SAVE / LOAD ────────────────────────────────────────────────────────────────
+// ── GITHUB SYNC ────────────────────────────────────────────────────────────────
+async function loadData(){
+  setSyncStatus('Syncing...','var(--am)');
+  // Load local first for instant display
+  try{const raw=localStorage.getItem('ks_d');if(raw){const p=JSON.parse(raw);clients=p.clients||[];}}catch(e){clients=[];}
+  renderClients();renderStatsBar();
+  // Then fetch from GitHub
+  try{
+    const r=await fetch(GH_API,{headers:{Authorization:`token ${GH_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
+    if(r.ok){
+      const d=await r.json();
+      const content=JSON.parse(atob(d.content.replace(/\n/g,'')));
+      const ghClients=content.clients||[];
+      // Use whichever has more data
+      if(ghClients.length>=clients.length){
+        clients=ghClients;
+        localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
+        renderClients();renderStatsBar();
+      }else if(clients.length>ghClients.length){
+        // Local has more — push up
+        await pushToGitHub();
+      }
+      setSyncStatus('Synced ✓','var(--gr)');
+    }else if(r.status===404){
+      // File doesn't exist yet — create it
+      await pushToGitHub();
+      setSyncStatus('Synced ✓','var(--gr)');
+    }else{
+      setSyncStatus('Sync error','var(--re)');
+    }
+  }catch(e){setSyncStatus('Offline — local only','var(--t3)');}
+}
+
+async function pushToGitHub(){
+  try{
+    const data=JSON.stringify({clients,v:3,updated:new Date().toISOString()});
+    const encoded=btoa(unescape(encodeURIComponent(data)));
+    // Get current SHA if file exists
+    let sha=null;
+    try{const r=await fetch(GH_API,{headers:{Authorization:`token ${GH_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});if(r.ok){const d=await r.json();sha=d.sha;}}catch(e){}
+    const body={message:'Update client data',content:encoded};
+    if(sha)body.sha=sha;
+    const r=await fetch(GH_API,{method:'PUT',headers:{Authorization:`token ${GH_TOKEN}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(r.ok){setSyncStatus('Synced ✓','var(--gr)');lastSyncTime=Date.now();}
+    else{setSyncStatus('Sync error','var(--re)');}
+  }catch(e){setSyncStatus('Offline','var(--t3)');}
+}
+
 function save(){
   const d=JSON.stringify({clients,v:3});
-  try{localStorage.setItem('ks_d',d);}catch(e){console.warn('localStorage save failed',e);}
-  if(driveOn&&aToken)saveDrive(d);
+  try{localStorage.setItem('ks_d',d);}catch(e){}
+  // Debounce GitHub sync — wait 1.5s after last change
+  clearTimeout(syncTimeout);
+  setSyncStatus('Saving...','var(--am)');
+  syncTimeout=setTimeout(()=>pushToGitHub(),1500);
 }
 
-function loadData(){
-  try{
-    const raw=localStorage.getItem('ks_d');
-    if(raw){const p=JSON.parse(raw);clients=p.clients||[];}
-    else{clients=[];}
-  }catch(e){clients=[];}
-  const t=localStorage.getItem('ks_at');
-  if(t){aToken=t;driveOn=true;updateDriveUI(true);loadDrive();}
-  else{renderClients();renderStatsBar();}
+function manualSync(){
+  setSyncStatus('Syncing...','var(--am)');
+  loadData();
 }
 
-// ── DRIVE ──────────────────────────────────────────────────────────────────────
-function openDriveModal(){
-  if(driveOn){toast('Drive connected','i');return;}
-  document.getElementById('moDrive').classList.add('open');
-}
-function signInGoogle(){
-  if(typeof google==='undefined'){
-    const s=document.createElement('script');
-    s.src='https://accounts.google.com/gsi/client';
-    s.onload=initGA;
-    document.head.appendChild(s);
-  }else{initGA();}
-}
-function initGA(){
-  if(!GCL){toast('OAuth not configured','e');useLocal();return;}
-  google.accounts.oauth2.initTokenClient({
-    client_id:GCL,
-    scope:'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file',
-    callback:(r)=>{
-      if(r.access_token){
-        aToken=r.access_token;
-        localStorage.setItem('ks_at',aToken);
-        driveOn=true;updateDriveUI(true);
-        closeMo('moDrive');
-        loadDrive();
-        toast('Google Drive connected!','s');
-      }
-    }
-  }).requestAccessToken();
-}
-function useLocal(){closeMo('moDrive');renderClients();renderStatsBar();}
-function updateDriveUI(on){
-  const b=document.getElementById('dBtn'),d=document.getElementById('dDot');
-  document.getElementById('dLbl').textContent=on?'Drive Connected':'Connect Drive';
-  if(on){b.classList.add('on');d.style.background='var(--gr)';d.style.boxShadow='0 0 5px var(--gr)';}
-  else{b.classList.remove('on');d.style.background='';d.style.boxShadow='';}
-}
-async function saveDrive(data){
-  try{
-    if(!driveFileId){
-      const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${DFILE}' and trashed=false&spaces=appDataFolder`,{headers:{Authorization:`Bearer ${aToken}`}});
-      if(!r.ok)return;
-      const d=await r.json();
-      if(d.files&&d.files.length)driveFileId=d.files[0].id;
-    }
-    if(driveFileId){
-      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`,{method:'PATCH',headers:{Authorization:`Bearer ${aToken}`,'Content-Type':'application/json'},body:data});
-    }else{
-      const f=new FormData();
-      f.append('metadata',new Blob([JSON.stringify({name:DFILE,parents:['appDataFolder']})],{type:'application/json'}));
-      f.append('file',new Blob([data],{type:'application/json'}));
-      const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{Authorization:`Bearer ${aToken}`},body:f});
-      if(r.ok)driveFileId=(await r.json()).id;
-    }
-  }catch(e){console.warn('Drive save error',e);}
-}
-async function loadDrive(){
-  try{
-    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${DFILE}' and trashed=false&spaces=appDataFolder`,{headers:{Authorization:`Bearer ${aToken}`}});
-    if(!r.ok){
-      localStorage.removeItem('ks_at');
-      aToken=null;driveOn=false;updateDriveUI(false);
-      renderClients();renderStatsBar();
-      setTimeout(()=>{if(!driveOn&&GCL)document.getElementById('moDrive').classList.add('open');},1500);
-      return;
-    }
-    const d=await r.json();
-    if(d.files&&d.files.length){
-      driveFileId=d.files[0].id;
-      const fr=await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,{headers:{Authorization:`Bearer ${aToken}`}});
-      if(fr.ok){
-        const fd=await fr.json();
-        const driveClients=fd.clients||[];
-        if(driveClients.length>=clients.length){
-          clients=driveClients;
-          localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
-        }else{
-          saveDrive(JSON.stringify({clients,v:3}));
-        }
-      }
-    }else{
-      saveDrive(JSON.stringify({clients,v:3}));
-    }
-  }catch(e){driveOn=false;updateDriveUI(false);}
-  renderClients();renderStatsBar();
+function setSyncStatus(msg,color){
+  const el=document.getElementById('syncStatus');
+  if(el){el.textContent=msg;el.style.color=color;}
 }
 
 // ── STRIPE ─────────────────────────────────────────────────────────────────────
@@ -502,10 +443,6 @@ function openStripeModal(){if(stripeKey)document.getElementById('skInput').value
 function saveStripeKey(){const v=document.getElementById('skInput').value.trim();if(!v)return;stripeKey=v;localStorage.setItem('ks_sk',v);updateStripeUI();closeMo('moStripe');toast('Stripe connected','s');}
 function removeStripeKey(){stripeKey=null;localStorage.removeItem('ks_sk');document.getElementById('skInput').value='';updateStripeUI();closeMo('moStripe');}
 function updateStripeUI(){const b=document.getElementById('sBtn');document.getElementById('sLbl').textContent=stripeKey?'Stripe ✓':'Stripe';if(stripeKey)b.classList.add('on-s');else b.classList.remove('on-s');}
-async function fetchStripeInv(id){
-  if(!stripeKey||!id)return null;
-  try{const r=await fetch(`https://api.stripe.com/v1/invoices/${id}`,{headers:{Authorization:`Bearer ${stripeKey}`}});if(!r.ok)return null;return await r.json();}catch(e){return null;}
-}
 
 // ── HELPERS ────────────────────────────────────────────────────────────────────
 function getDaysLeft(c){
@@ -514,7 +451,6 @@ function getDaysLeft(c){
   return Math.ceil((new Date(c.startDate).getTime()+days*86400000-Date.now())/86400000);
 }
 function getPct(c){return Math.min(100,Math.round(((parseInt(c.current)||0)/(parseInt(c.target)||1))*100));}
-function fmtDate(ts){return ts?new Date(ts*1000).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'}):'—';}
 function nowDateStr(){return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
 function getMonthKey(d){const x=d?new Date(d):new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0');}
 function getMonthLabel(k){const[y,m]=k.split('-');return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]+"'"+String(y).slice(2);}
@@ -522,15 +458,12 @@ function lastNMonths(n){const ms=[];const d=new Date();for(let i=n-1;i>=0;i--){c
 function getInvoiceEvery(c){if(c.invEvery==='custom')return parseInt(c.invCustom)||5;return parseInt(c.invEvery)||5;}
 function checkInvoiceTrigger(c){
   if(c.contractType!=='ppa')return false;
-  const every=getInvoiceEvery(c);
-  const cur=parseInt(c.current)||0;
-  const lastAt=parseInt(c.lastInvoiceAt)||0;
+  const every=getInvoiceEvery(c),cur=parseInt(c.current)||0,lastAt=parseInt(c.lastInvoiceAt)||0;
   return(cur-lastAt)>=every&&c.invState!=='needs-send'&&c.invState!=='waiting';
 }
 function getAutoStatus(c){
   if(c.status&&c.status!=='auto')return c.status;
-  const current=parseInt(c.current)||0;
-  const target=parseInt(c.target)||0;
+  const current=parseInt(c.current)||0,target=parseInt(c.target)||0;
   if(!target)return'on-track';
   const bookingPct=Math.min(100,(current/target)*100);
   if(c.contractType==='pif'&&c.startDate){
@@ -605,11 +538,9 @@ function renderRow(c){
   const dColor=dl!==null&&dl<=7?'var(--re)':dl!==null&&dl<=14?'var(--am)':'var(--tx)';
   const daysHtml=isPPA?`<div class="crow-stat crow-mid"><div class="crow-stat-val">£${c.perbooking||'—'}</div><div class="crow-stat-label">Per Appt</div></div>`:`<div class="crow-stat crow-mid"><div class="crow-stat-val" style="color:${dColor}">${dl!==null?dl+'d':'—'}</div><div class="crow-stat-label">Days Left</div></div>`;
   const bookingCtrl=isPPA?`<div class="crow-booking-ctrl" onclick="event.stopPropagation()"><button class="bk-btn bk-minus" onclick="adjBooking('${c.id}',-1)">−</button><div class="bk-count">${c.current||0}</div><button class="bk-btn bk-plus" onclick="adjBooking('${c.id}',1)">+</button></div>`:`<div class="crow-stat crow-mid"><div class="crow-stat-val">${c.current||0}</div><div class="crow-stat-label">Bookings</div></div>`;
-
-  // Invoice alert
   let invAlert='';
   if(c.invState==='needs-send'){
-    invAlert=`<div class="inv-alert needs-send"><div class="inv-alert-txt">🔔 Invoice ready to send<span>${getInvoiceEvery(c)} bookings reached · £${c.invamt||'—'}</span></div><div style="display:flex;gap:8px;" onclick="event.stopPropagation()"><button class="btn btn-am btn-sm" onclick="sendInvoice('${c.id}')">Mark Sent ✓</button><button class="btn btn-ghost btn-sm" onclick="dismissInv('${c.id}')">Dismiss</button></div></div>`;
+    invAlert=`<div class="inv-alert needs-send"><div class="inv-alert-txt">🔔 Invoice ready to send<span>${getInvoiceEvery(c)} bookings · £${c.invamt||'—'}</span></div><div style="display:flex;gap:8px;" onclick="event.stopPropagation()"><button class="btn btn-am btn-sm" onclick="sendInvoice('${c.id}')">Mark Sent ✓</button><button class="btn btn-ghost btn-sm" onclick="dismissInv('${c.id}')">Dismiss</button></div></div>`;
   }else if(c.invState==='waiting'){
     invAlert=`<div class="inv-alert waiting"><div class="inv-alert-txt">⏳ Awaiting payment<span>Sent ${c.invSentDate||''} · £${c.invamt||'—'}</span></div><div onclick="event.stopPropagation()"><button class="btn btn-gr btn-sm" onclick="markPaid('${c.id}')">Mark Paid ✓</button></div></div>`;
   }else if(c.invState==='paid'){
@@ -620,16 +551,14 @@ function renderRow(c){
   }else if(!isPPA){
     const inv=c.inv_pif||'unpaid';
     const ic=inv==='paid'?'paid':inv==='declined'?'declined':'waiting';
-    const il=inv==='paid'?'✅ Invoice paid':inv==='declined'?'❌ Invoice declined':'⏳ Invoice pending';
+    const il=inv==='paid'?'✅ Invoice paid':inv==='declined'?'❌ Declined':'⏳ Invoice pending';
     invAlert=`<div class="inv-alert ${ic}"><div class="inv-alert-txt">${il}<span>£${c.totalfee||'—'} · ${c.terms||'—'}</span></div><div onclick="event.stopPropagation()" style="display:flex;gap:6px;">${inv!=='paid'?`<button class="btn btn-gr btn-sm" onclick="setInvPif('${c.id}','paid')">Mark Paid</button>`:''}<button class="btn btn-ghost btn-sm" onclick="setInvPif('${c.id}','unpaid')">Reset</button></div></div>`;
   }
-
-  // Expanded section
   let expandedHtml='';
   if(exp){
     const bookings=c.bookings||[];
     const months=lastNMonths(3);
-    const chartBars=months.map(mk=>{const cnt=(bookings).filter(b=>getMonthKey(b.rawDate)===mk).length;return`<div class="mc-bar-wrap"><div class="mc-bar" style="height:${cnt?Math.max(6,cnt*12)+'px':'2px'};opacity:${cnt?'1':'.2'}"></div><div class="mc-label">${getMonthLabel(mk)}</div><div class="mc-val">${cnt||''}</div></div>`;}).join('');
+    const chartBars=months.map(mk=>{const cnt=bookings.filter(b=>getMonthKey(b.rawDate)===mk).length;return`<div class="mc-bar-wrap"><div class="mc-bar" style="height:${cnt?Math.max(6,cnt*12)+'px':'2px'};opacity:${cnt?'1':'.2'}"></div><div class="mc-label">${getMonthLabel(mk)}</div><div class="mc-val">${cnt||''}</div></div>`;}).join('');
     const blogItems=bookings.length?bookings.map((b,i)=>`<div class="blog-entry"><span class="be-date">${b.date}</span><span class="be-note">${b.note||'Booking logged'}</span><span class="be-del" onclick="event.stopPropagation();delBooking('${c.id}',${i})">✕</span></div>`).join(''):'<div style="font-size:11px;color:var(--t3);padding:4px 0;">No bookings yet.</div>';
     const contractInfo=isPPA?`
       <div class="erow"><span class="erow-l">Setup Fee</span><span class="erow-r">£${c.setup||'0'}</span></div>
@@ -669,7 +598,6 @@ function renderRow(c){
       </div>
     </div>`;
   }
-
   return`<div class="client-row ${sc}" onclick="toggleExpand('${c.id}')">
     <div class="crow-main">
       <div>
@@ -808,13 +736,13 @@ function deleteClient(id){
 let distMode='miles';
 let mapsKey=localStorage.getItem('ks_maps')||'';
 function setDistMode(m,el){distMode=m;document.querySelectorAll('.dist-mode-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');const w=document.getElementById('mapsKeyWrap');if(w)w.style.display=m==='time'?'block':'none';document.getElementById('distResults').innerHTML='';}
-function saveMapsKey(){const v=document.getElementById('mapsKeyInput')?.value.trim();if(!v)return;mapsKey=v;localStorage.setItem('ks_maps',v);const st=document.getElementById('mapsKeyStatus');if(st){st.textContent='Key saved';st.style.color='var(--gr)';}}
+function saveMapsKey(){const v=document.getElementById('mapsKeyInput')?.value.trim();if(!v)return;mapsKey=v;localStorage.setItem('ks_maps',v);toast('Maps key saved','s');}
 async function checkDist(){
   const pc=document.getElementById('leadPC').value.trim().toUpperCase();
   const err=document.getElementById('distErr'),res=document.getElementById('distResults');
   if(!pc){err.textContent='Enter a postcode';err.style.display='block';return;}
   err.style.display='none';
-  if(distMode==='time'&&!mapsKey){err.textContent='Add your Google Maps API key above to use drive time mode.';err.style.display='block';return;}
+  if(distMode==='time'&&!mapsKey){err.textContent='Add your Google Maps API key above.';err.style.display='block';return;}
   res.innerHTML=`<div style="text-align:center;padding:40px;color:var(--t2);"><span class="sp"></span><div style="margin-top:10px;font-size:12px;">Looking up...</div></div>`;
   let lc;
   try{const r=await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(pc)}`);const d=await r.json();if(d.status!==200)throw new Error();lc={lat:d.result.latitude,lng:d.result.longitude};}
@@ -826,7 +754,7 @@ async function checkDist(){
     catch(e){return{...c,dist:null};}
   }));
   if(distMode==='time'){
-    const valid=wc.filter(c=>c.lat!==null);
+    const valid=wc.filter(c=>c.lat!=null);
     for(let i=0;i<valid.length;i+=10){
       const batch=valid.slice(i,i+10);
       const dests=batch.map(c=>`${c.lat},${c.lng}`).join('|');
@@ -848,7 +776,6 @@ function dCard(c,inR){
 }
 function hav(a,b,c,d){const R=3958.8,dl=(c-a)*Math.PI/180,dn=(d-b)*Math.PI/180,x=Math.sin(dl/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dn/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 
-// ── MODALS ─────────────────────────────────────────────────────────────────────
 function closeMo(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
 function toast(m,t='s'){const x=document.getElementById('toast');x.textContent=m;x.className=`toast ${t} show`;setTimeout(()=>x.classList.remove('show'),3000);}
