@@ -20,9 +20,10 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 .hbtn:hover{border-color:var(--or);color:var(--tx);}
 .hbtn.on{color:var(--gr);border-color:rgba(74,222,128,.35);}
 .hbtn.on-s{color:var(--pu);border-color:rgba(167,139,250,.35);}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--t3);}
-.hbtn.on .dot{background:var(--gr);box-shadow:0 0 5px var(--gr);}
-.sync-status{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--am);flex-shrink:0;transition:background .3s;}
+.sync-dot.ok{background:var(--gr);box-shadow:0 0 5px var(--gr);}
+.sync-dot.err{background:var(--re);}
+.sync-lbl{font-size:10px;color:var(--t2);font-family:'DM Mono',monospace;}
 .tabs{display:flex;padding:0 24px;border-bottom:1px solid var(--b1);background:var(--s1);}
 .tab{padding:12px 16px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;}
 .tab:hover{color:var(--t2);}.tab.active{color:var(--or);border-bottom-color:var(--or);}
@@ -41,7 +42,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:14px;}
 .sort-sel{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);color:var(--t2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:9px 12px;cursor:pointer;outline:none;transition:border-color .2s;text-transform:uppercase;letter-spacing:.05em;}
 .sort-sel:focus{border-color:var(--or);}.sort-sel option{background:var(--s2);}
-.filters{display:flex;gap:6px;}
+.filters{display:flex;gap:6px;flex-wrap:wrap;}
 .fb{padding:7px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:20px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--t3);cursor:pointer;transition:all .2s;text-transform:uppercase;}
 .fb:hover{border-color:var(--b2);color:var(--t2);}.fb.active{background:var(--or);border-color:var(--or);color:#fff;}
 .btn{padding:9px 16px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border-radius:var(--r2);cursor:pointer;transition:all .18s;border:none;}
@@ -55,9 +56,11 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 .client-row{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;transition:all .18s;}
 .client-row:hover{border-color:var(--b2);box-shadow:0 4px 16px rgba(0,0,0,.3);}
 .client-row.s-re{border-left:3px solid var(--re);}.client-row.s-am{border-left:3px solid var(--am);}.client-row.s-gr{border-left:3px solid var(--gr);}
-.crow-main{display:grid;grid-template-columns:2fr auto auto auto auto auto;align-items:center;gap:16px;padding:14px 18px;cursor:pointer;}
+.client-row.ads-off{opacity:.75;}
+.crow-main{display:grid;grid-template-columns:2fr auto auto auto auto auto;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;}
+.crow-prog{display:flex;flex-direction:column;gap:4px;min-width:100px;}
 .crow-name{font-size:14px;font-weight:700;}.crow-company{font-size:11px;color:var(--t2);margin-top:2px;font-family:'DM Mono',monospace;}
-.crow-badge-wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px;}
+.crow-badge-wrap{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:5px;}
 .badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
 .badge-ppa{background:var(--ord);color:var(--or);border:1px solid rgba(255,106,0,.25);}
 .badge-pif{background:rgba(74,222,128,.08);color:var(--gr);border:1px solid rgba(74,222,128,.2);}
@@ -68,34 +71,46 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 .badge-ob-needs{background:rgba(99,102,241,.12);color:#818cf8;border:1px solid rgba(99,102,241,.25);}
 .badge-ob-started{background:rgba(245,158,11,.1);color:var(--am);border:1px solid rgba(245,158,11,.25);}
 .badge-ob-live{background:rgba(74,222,128,.08);color:var(--gr);border:1px solid rgba(74,222,128,.2);}
-.crow-stat{text-align:center;min-width:60px;}
+.badge-ads-off{background:rgba(239,68,68,.1);color:var(--re);border:1px solid rgba(239,68,68,.3);}
+.crow-stat{text-align:center;min-width:55px;}
 .crow-stat-val{font-size:18px;font-weight:800;font-family:'DM Mono',monospace;line-height:1;}
 .crow-stat-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-top:3px;}
-.crow-prog{display:flex;flex-direction:column;gap:4px;min-width:100px;}
+.crow-prog{display:flex;flex-direction:column;gap:4px;min-width:90px;}
 .prog-bar{height:4px;background:var(--s3);border-radius:2px;overflow:hidden;}
 .prog-fill{height:100%;border-radius:2px;transition:width .4s;}
 .fill-or{background:var(--or);}.fill-gr{background:var(--gr);}.fill-am{background:var(--am);}.fill-re{background:var(--re);}
 .prog-label{font-size:10px;color:var(--t2);display:flex;justify-content:space-between;}
-.crow-booking-ctrl{display:flex;align-items:center;gap:0;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);overflow:hidden;flex-shrink:0;}
-.bk-btn{width:32px;height:36px;background:none;border:none;color:var(--t2);font-size:18px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;line-height:1;}
+.crow-booking-ctrl{display:flex;align-items:center;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);overflow:hidden;flex-shrink:0;}
+.bk-btn{width:30px;height:34px;background:none;border:none;color:var(--t2);font-size:18px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
 .bk-btn:hover{background:var(--b2);color:var(--tx);}
 .bk-btn.bk-plus:hover{background:var(--or);color:#fff;}
 .bk-btn.bk-minus:hover{background:rgba(239,68,68,.7);color:#fff;}
-.bk-count{min-width:36px;text-align:center;font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:var(--tx);padding:0 4px;border-left:1px solid var(--b1);border-right:1px solid var(--b1);}
-.inv-alert{margin:0 18px 12px;padding:11px 14px;border-radius:var(--r2);display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;flex-wrap:wrap;}
+.bk-count{min-width:34px;text-align:center;font-size:15px;font-weight:800;font-family:'DM Mono',monospace;color:var(--tx);padding:0 3px;border-left:1px solid var(--b1);border-right:1px solid var(--b1);}
+
+/* ADS TOGGLE */
+.ads-toggle{display:flex;align-items:center;gap:5px;cursor:pointer;padding:4px 8px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--s2);transition:all .2s;flex-shrink:0;}
+.ads-toggle:hover{border-color:var(--b2);}
+.ads-toggle.off{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.06);}
+.ads-tog-dot{width:8px;height:8px;border-radius:50%;background:var(--gr);transition:background .2s;}
+.ads-toggle.off .ads-tog-dot{background:var(--re);}
+.ads-tog-lbl{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t2);}
+.ads-toggle.off .ads-tog-lbl{color:var(--re);}
+
+.inv-alert{margin:0 18px 12px;padding:10px 14px;border-radius:var(--r2);display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;flex-wrap:wrap;}
 .inv-alert.needs-send{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);}
 .inv-alert.waiting{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);}
 .inv-alert.paid{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);}
 .inv-alert.neutral{background:var(--s2);border:1px solid var(--b1);}
 .inv-alert.declined{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);}
+.inv-alert.ads-paused{background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.15);}
 .inv-alert-txt{font-weight:600;}
 .inv-alert-txt span{color:var(--t2);font-weight:400;margin-left:6px;font-size:11px;}
-.crow-expanded{display:none;border-top:1px solid var(--b1);padding:18px;}
+.crow-expanded{display:none;border-top:1px solid var(--b1);padding:16px;}
 .crow-expanded.open{display:block;}
-.exp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;}
-.exp-section{background:var(--s2);border-radius:var(--r);padding:14px;}
+.exp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;}
+.exp-section{background:var(--s2);border-radius:var(--r);padding:13px;}
 .exp-section.full{grid-column:1/-1;}
-.exp-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--or);margin-bottom:11px;}
+.exp-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--or);margin-bottom:10px;}
 .erow{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--b1);font-size:12px;}
 .erow:last-child{border-bottom:none;}
 .erow-l{color:var(--t3);}.erow-r{font-family:'DM Mono',monospace;font-weight:600;}
@@ -106,15 +121,15 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 .be-date{color:var(--t3);font-family:'DM Mono',monospace;font-size:10px;white-space:nowrap;}
 .be-note{flex:1;color:var(--t2);}
 .be-del{color:var(--t3);cursor:pointer;font-size:11px;transition:color .2s;}.be-del:hover{color:var(--re);}
-.month-chart{display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:8px;}
+.month-chart{display:flex;align-items:flex-end;gap:4px;height:55px;margin-top:8px;}
 .mc-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;}
-.mc-bar{width:100%;background:var(--or);border-radius:2px 2px 0 0;min-height:2px;transition:height .3s;}
+.mc-bar{width:100%;background:var(--or);border-radius:2px 2px 0 0;min-height:2px;}
 .mc-label{font-size:9px;color:var(--t3);font-family:'DM Mono',monospace;}
 .mc-val{font-size:9px;color:var(--t2);font-family:'DM Mono',monospace;}
 .ob-tog{display:flex;gap:8px;margin-top:2px;}
-.ob-opt{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer;transition:all .18s;text-align:center;}
+.ob-opt{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 8px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer;transition:all .18s;text-align:center;}
 .ob-opt:hover{border-color:var(--b2);}.ob-opt.sel{border-color:var(--or);background:var(--ord);}
-.ob-icon{font-size:18px;line-height:1;}.ob-label{font-size:11px;font-weight:700;letter-spacing:.03em;}
+.ob-icon{font-size:18px;line-height:1;}.ob-label{font-size:11px;font-weight:700;}
 .empty{text-align:center;padding:60px 20px;color:var(--t3);}
 .empty-icon{font-size:40px;margin-bottom:12px;opacity:.3;}.empty h3{font-size:15px;color:var(--t2);margin-bottom:6px;}.empty p{font-size:12px;}
 .mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);}
@@ -144,12 +159,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 .cmr-name{font-size:12px;font-weight:700;width:130px;flex-shrink:0;}
 .cmr-bars{flex:1;display:flex;align-items:flex-end;gap:3px;height:40px;}
 .cmr-bar{flex:1;background:var(--or);border-radius:2px 2px 0 0;min-height:2px;opacity:.8;}
-.cmr-bar:last-child{opacity:1;}
 .cmr-total{font-size:14px;font-weight:800;font-family:'DM Mono',monospace;color:var(--or);width:30px;text-align:right;flex-shrink:0;}
-.dist-mode-tog{display:inline-flex;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden;margin-bottom:4px;}
-.dist-mode-btn{padding:7px 18px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em;background:none;border:none;color:var(--t3);cursor:pointer;transition:all .2s;}
-.dist-mode-btn.active{background:var(--or);color:#fff;}
-.dist-mode-btn:hover:not(.active){color:var(--t2);}
 .dist-hero{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:24px;margin-bottom:18px;text-align:center;}
 .dist-row{display:flex;gap:10px;max-width:380px;margin:0 auto;}
 .dist-row .fi{text-transform:uppercase;letter-spacing:.1em;font-family:'DM Mono',monospace;font-size:14px;}
@@ -175,8 +185,8 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 <header class="hdr">
   <div class="logo">Keystone <span>Setters</span></div>
   <div class="hdr-r">
-    <span class="sync-status" id="syncStatus"></span>
-    <button class="hbtn" id="syncBtn" onclick="manualSync()"><span class="dot" id="syncDot"></span><span id="syncLbl">Connect Drive</span></button>
+    <span class="sync-lbl" id="syncLbl">Connecting...</span>
+    <span class="sync-dot" id="syncDot"></span>
     <button class="hbtn" id="sBtn" onclick="openStripeModal()">⚡ <span id="sLbl">Stripe</span></button>
     <button class="btn btn-or" style="font-size:11px;" onclick="openAdd()">+ Add Client</button>
   </div>
@@ -208,6 +218,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
         <button class="fb" onclick="setFilter('amber',this)">DEFCON 2</button>
         <button class="fb" onclick="setFilter('red',this)">DEFCON 1</button>
         <button class="fb" onclick="setFilter('invoice',this)">Invoice Due</button>
+        <button class="fb" onclick="setFilter('ads-off',this)">Ads Off</button>
       </div>
     </div>
     <div class="client-list" id="clientList"></div>
@@ -226,21 +237,8 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
   <div class="page" id="page-distance">
     <div class="dist-hero">
       <div style="font-size:17px;font-weight:800;margin-bottom:5px;">📍 Distance Checker</div>
-      <div style="font-size:12px;color:var(--t2);margin-bottom:16px;">Enter a lead's postcode — check against all client radii</div>
-      <div class="dist-mode-tog">
-        <button class="dist-mode-btn active" id="modeBtn-miles" onclick="setDistMode('miles',this)">📏 Miles</button>
-        <button class="dist-mode-btn" id="modeBtn-time" onclick="setDistMode('time',this)">🚗 Drive Time</button>
-      </div>
-      <div id="mapsKeyWrap" style="display:none;margin:12px auto;max-width:420px;">
-        <div style="background:rgba(255,106,0,.08);border:1px solid rgba(255,106,0,.25);border-radius:var(--r2);padding:10px 13px;font-size:11px;color:var(--t2);text-align:left;margin-bottom:8px;">
-          ⚡ Drive time needs a <strong style="color:var(--tx);">Google Maps API key</strong> — console.cloud.google.com → Distance Matrix API → Credentials.
-        </div>
-        <div style="display:flex;gap:8px;">
-          <input class="fi" id="mapsKeyInput" type="password" placeholder="AIza..." style="flex:1;font-size:12px;">
-          <button class="btn btn-or" style="white-space:nowrap;" onclick="saveMapsKey()">Save Key</button>
-        </div>
-      </div>
-      <div class="dist-row" style="margin-top:14px;">
+      <div style="font-size:12px;color:var(--t2);margin-bottom:20px;">Enter a lead's postcode — check against all client radii</div>
+      <div class="dist-row">
         <input class="fi" id="leadPC" placeholder="e.g. M1 1AE" maxlength="10" onkeydown="if(event.key==='Enter')checkDist()">
         <button class="btn btn-or" onclick="checkDist()">Check</button>
       </div>
@@ -251,29 +249,12 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 </main>
 <div class="toast" id="toast"></div>
 
-<!-- DRIVE MODAL -->
-<div class="mo" id="moSync">
-  <div class="md" style="max-width:380px;">
-    <button class="md-x" onclick="closeMo('moSync')">✕</button>
-    <div style="text-align:center;padding:8px 0;">
-      <div style="font-size:42px;margin-bottom:12px;">☁️</div>
-      <div style="font-size:16px;font-weight:800;margin-bottom:6px;">Connect Google Drive</div>
-      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:20px;">Sign in once — data syncs across every browser and device automatically.</div>
-      <button style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;background:#fff;color:#333;border:none;border-radius:var(--r2);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin:0 auto 10px;width:100%;max-width:260px;" onclick="signInGoogle()">
-        <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
-        Sign in with Google
-      </button>
-      <button style="display:block;width:100%;max-width:260px;margin:0 auto;padding:8px;background:transparent;border:1px solid var(--b1);border-radius:var(--r2);color:var(--t3);font-family:'Syne',sans-serif;font-size:11px;cursor:pointer;" onclick="useLocal()">Use local storage only</button>
-    </div>
-  </div>
-</div>
-
 <!-- STRIPE MODAL -->
 <div class="mo" id="moStripe">
   <div class="md" style="max-width:400px;">
     <button class="md-x" onclick="closeMo('moStripe')">✕</button>
     <div class="md-title">⚡ Connect Stripe</div>
-    <p style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:14px;">Pull live invoice status. Use a <strong style="color:var(--tx);">restricted read-only key</strong> from your Stripe dashboard.</p>
+    <p style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:14px;">Use a <strong style="color:var(--tx);">restricted read-only key</strong> from your Stripe dashboard.</p>
     <div class="fgrp" style="margin-bottom:10px;">
       <label class="fl">Restricted API Key (rk_live_...)</label>
       <div style="display:flex;gap:8px;"><input class="fi" id="skInput" type="password" placeholder="rk_live_..." style="flex:1;"><button class="btn btn-or" onclick="saveStripeKey()">Save</button></div>
@@ -329,7 +310,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
           <div class="fgrp"><label class="fl">Total Fee £</label><input class="fi" id="f_totalfee" type="number" placeholder="e.g. 2000"></div>
           <div class="fgrp"><label class="fl">Guarantee Period</label>
             <select class="fs" id="f_period" onchange="document.getElementById('f_cdw').style.display=this.value==='custom'?'block':'none'">
-              <option value="30">30 days</option><option value="45">45 days</option><option value="60">60 days</option><option value="90" selected>90 days</option><option value="custom">Custom</option>
+              <option value="30">30 days</option><option value="45">45 days</option><option value="60">60 days</option><option value="90" selected>90 days</option><option value="120">120 days</option><option value="150">150 days</option><option value="180">180 days</option><option value="custom">Custom</option>
             </select>
           </div>
           <div class="fgrp" id="f_cdw" style="display:none;"><label class="fl">Custom Days</label><input class="fi" id="f_customdays" type="number"></div>
@@ -366,32 +347,22 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 </div>
 
 <script>
-let clients=[],editId=null,curContract='ppa',curFilter='all';
-let stripeKey=null,expandedIds=new Set();
-let syncTimeout=null;
+// ── CONFIG ─────────────────────────────────────────────────────────────────────
+const BIN_ID='6a637a25da38895dfe8a3dcd';
+const BIN_KEY='$2a$10$YAbo2.HJNndQmvqMS4Mwku5n/e99ppqzoffguUQRHDuCF1iar6jlK';
+const BIN_URL=`https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-const GCL='234293704596-h0cvhdl9nffm335bamnlk7251b1dtcbi.apps.googleusercontent.com';
-const DFILE='ks-setters-v2.json';
-let driveOn=false,driveFileId=null,aToken=null;
+// ── STATE ──────────────────────────────────────────────────────────────────────
+let clients=[],editId=null,curContract='ppa',curFilter='all';
+let stripeKey=null,expandedIds=new Set(),syncTimeout=null,isSaving=false;
 
 window.addEventListener('load',()=>{
   stripeKey=localStorage.getItem('ks_sk')||null;
   updateStripeUI();
   loadData();
+  // Auto-refresh every 30 seconds to pick up changes from other devices
+  setInterval(()=>{if(!isSaving)loadData(true);},30000);
 });
-
-// Pre-loaded client data
-const SEED_CLIENTS=[
-  {id:'1000000001',name:'Gabriel Talase',company:'Gabriel Maintenance Pro',niche:'Bathrooms',postcode:'NW90BB',radius:'15',status:'auto',target:'50',current:'32',contractType:'pif',period:'180',startDate:'2026-02-14',totalfee:'4000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'Open to most timings - now focused more on quality rather than quantity',bookings:[]},
-  {id:'1000000002',name:'Sandel Musca',company:'MBT Group',niche:'Bathrooms',postcode:'EC1V2NX',radius:'15',status:'auto',target:'25',current:'11',contractType:'pif',period:'90',startDate:'2026-04-05',totalfee:'2000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'Gets lots of lead flow so can mass book',bookings:[]},
-  {id:'1000000003',name:'Robert Nagy',company:'Marilyns Kitchens',niche:'Kitchens',postcode:'OX262BE',radius:'20',status:'auto',target:'25',current:'10',contractType:'pif',period:'90',startDate:'2026-03-20',totalfee:'2000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'More of an urgency - they no show some bookings',bookings:[]},
-  {id:'1000000004',name:'Tom Millin',company:'Fluent Ads',niche:'Architectural',postcode:'TW166SB',radius:'15',status:'auto',target:'30',current:'13',contractType:'pif',period:'150',startDate:'2026-03-30',totalfee:'750',terms:'monthly',inv_pif:'paid',onboarding:['live'],prefs:'Book in advice calls which then turn into at home consultations. Main priority right now is having people with a close timeline and also within their service area',bookings:[]},
-  {id:'1000000005',name:'Marcin Maciula',company:'MM Building Services',niche:'Extensions',postcode:'SM51TS',radius:'18',status:'auto',target:'20',current:'8',contractType:'pif',period:'90',startDate:'2026-04-10',totalfee:'2000',terms:'split',inv_pif:'paid',onboarding:['live'],prefs:'Struggles on sales - big on location and service area',bookings:[]},
-  {id:'1000000006',name:'Yusuf and Tausif Darbar',company:'Fixzen Services',niche:'Extensions',postcode:'E78HQ',radius:'15',status:'auto',target:'20',current:'6',contractType:'ppa',setup:'1000',perbooking:'125',invEvery:'5',invamt:'625',monthlyTarget:'',ppaStartDate:'',onboarding:['live'],prefs:'Can only do some specific times - timeline big problem with them. They also no show bookings',bookings:[]},
-  {id:'1000000007',name:'Harry Brook',company:'Rune Construction',niche:'Kitchens',postcode:'TN389EY',radius:'20',status:'auto',target:'20',current:'8',contractType:'pif',period:'90',startDate:'2026-04-28',totalfee:'2000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'Will travel further for jobs',notes:'Ads are currently off so no more leads will be coming in at the moment',bookings:[]},
-  {id:'1000000008',name:'Umair Zahid',company:'Kabilo Ltd',niche:'Bathrooms',postcode:'E176QN',radius:'15',status:'auto',target:'25',current:'7',contractType:'pif',period:'90',startDate:'2026-05-11',totalfee:'2000',terms:'upfront',inv_pif:'paid',onboarding:['live'],prefs:'Has multiple people that can go out and do the site visits. Can handle all projects so possibly lead share with other companies',bookings:[]},
-  {id:'1000000009',name:'Chris Smith',company:'Smiths Kitchens',niche:'Kitchens',postcode:'RH203DD',radius:'20',status:'auto',target:'25',current:'0',contractType:'ppa',setup:'1000',perbooking:'100',invEvery:'5',invamt:'500',monthlyTarget:'',ppaStartDate:'',onboarding:['live'],prefs:'Serious trust issues - new client so load with bookings',bookings:[]},
-];
 
 function switchTab(t,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -401,122 +372,67 @@ function switchTab(t,el){
   if(t==='stats')renderStats();
 }
 
-function save(){
-  const d=JSON.stringify({clients,v:3});
-  try{localStorage.setItem('ks_d',d);}catch(e){}
-  if(driveOn&&aToken)saveDrive(d);
-}
-
-function loadData(){
-  try{const raw=localStorage.getItem('ks_d');if(raw){const p=JSON.parse(raw);clients=p.clients||[];}}catch(e){clients=[];}
-  // If no clients yet, use seed data
-  if(clients.length===0)clients=SEED_CLIENTS.map(c=>({...c}));
-  const t=localStorage.getItem('ks_at');
-  if(t){aToken=t;driveOn=true;updateSyncUI(true);loadDrive();}
-  else{renderClients();renderStatsBar();}
-}
-
-function manualSync(){
-  if(driveOn){loadDrive();}
-  else{document.getElementById('moSync').classList.add('open');}
-}
-
-function updateSyncUI(on){
-  const btn=document.getElementById('syncBtn');
+// ── JSONBIN SYNC ───────────────────────────────────────────────────────────────
+function setSyncUI(state){
+  const dot=document.getElementById('syncDot');
   const lbl=document.getElementById('syncLbl');
-  if(on){btn.classList.add('on');lbl.textContent='Drive Synced';setSyncStatus('Synced ✓','var(--gr)');}
-  else{btn.classList.remove('on');lbl.textContent='Connect Drive';setSyncStatus('','');}
+  if(state==='ok'){dot.className='sync-dot ok';lbl.textContent='Synced ✓';}
+  else if(state==='saving'){dot.className='sync-dot';lbl.textContent='Saving...';}
+  else if(state==='loading'){dot.className='sync-dot';lbl.textContent='Loading...';}
+  else{dot.className='sync-dot err';lbl.textContent='Sync error';}
 }
 
-function setSyncStatus(msg,color){
-  const el=document.getElementById('syncStatus');
-  if(el){el.textContent=msg;el.style.color=color;}
-}
-
-async function saveDrive(data){
+async function loadData(silent=false){
+  if(!silent)setSyncUI('loading');
+  // Load local first for instant render
+  try{const raw=localStorage.getItem('ks_d');if(raw){const p=JSON.parse(raw);clients=p.clients||[];}}catch(e){clients=[];}
+  if(!silent){renderClients();renderStatsBar();}
+  // Fetch from JSONBin
   try{
-    if(!driveFileId){
-      const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${DFILE}' and trashed=false&spaces=appDataFolder`,{headers:{Authorization:`Bearer ${aToken}`}});
-      if(!r.ok){handleExpiredToken();return;}
-      const d=await r.json();
-      if(d.files&&d.files.length)driveFileId=d.files[0].id;
-    }
-    if(driveFileId){
-      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`,{method:'PATCH',headers:{Authorization:`Bearer ${aToken}`,'Content-Type':'application/json'},body:data});
-    }else{
-      const f=new FormData();
-      f.append('metadata',new Blob([JSON.stringify({name:DFILE,parents:['appDataFolder']})],{type:'application/json'}));
-      f.append('file',new Blob([data],{type:'application/json'}));
-      const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{Authorization:`Bearer ${aToken}`},body:f});
-      if(r.ok)driveFileId=(await r.json()).id;
-    }
-    setSyncStatus('Synced ✓','var(--gr)');
-  }catch(e){setSyncStatus('Sync error','var(--re)');}
-}
-
-async function loadDrive(){
-  setSyncStatus('Syncing...','var(--am)');
-  try{
-    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${DFILE}' and trashed=false&spaces=appDataFolder`,{headers:{Authorization:`Bearer ${aToken}`}});
-    if(!r.ok){handleExpiredToken();return;}
+    const r=await fetch(`${BIN_URL}/latest`,{headers:{'X-Master-Key':BIN_KEY,'X-Bin-Meta':false}});
+    if(!r.ok)throw new Error('fetch failed');
     const d=await r.json();
-    if(d.files&&d.files.length){
-      driveFileId=d.files[0].id;
-      const fr=await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,{headers:{Authorization:`Bearer ${aToken}`}});
-      if(fr.ok){
-        const fd=await fr.json();
-        const driveClients=fd.clients||[];
-        if(driveClients.length>=clients.length){
-          clients=driveClients;
-          localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
-        }else{
-          saveDrive(JSON.stringify({clients,v:3}));
-        }
+    const binClients=d.clients||[];
+    // Use whichever has more — prevents overwriting newer data
+    if(binClients.length>0){
+      // Compare by last updated timestamp if available
+      const localUpdated=parseInt(localStorage.getItem('ks_updated')||'0');
+      const binUpdated=d.updated||0;
+      if(binUpdated>=localUpdated||binClients.length>clients.length){
+        clients=binClients;
+        localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
+        localStorage.setItem('ks_updated',String(binUpdated));
+      }else if(clients.length>binClients.length){
+        await pushData();return;
       }
-    }else{
-      saveDrive(JSON.stringify({clients,v:3}));
+    }else if(clients.length>0){
+      await pushData();return;
     }
-    setSyncStatus('Synced ✓','var(--gr)');
-  }catch(e){setSyncStatus('Offline','var(--t3)');}
+    setSyncUI('ok');
+  }catch(e){setSyncUI('err');}
   renderClients();renderStatsBar();
 }
 
-function handleExpiredToken(){
-  localStorage.removeItem('ks_at');
-  aToken=null;driveOn=false;
-  updateSyncUI(false);
-  renderClients();renderStatsBar();
-  document.getElementById('moSync').classList.add('open');
+async function pushData(){
+  isSaving=true;setSyncUI('saving');
+  try{
+    const now=Date.now();
+    const data={clients,v:3,updated:now};
+    const r=await fetch(BIN_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':BIN_KEY},body:JSON.stringify(data)});
+    if(!r.ok)throw new Error('push failed');
+    localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
+    localStorage.setItem('ks_updated',String(now));
+    setSyncUI('ok');
+  }catch(e){setSyncUI('err');}
+  isSaving=false;
 }
 
-function signInGoogle(){
-  if(typeof google==='undefined'){
-    const s=document.createElement('script');
-    s.src='https://accounts.google.com/gsi/client';
-    s.onload=initGA;
-    document.head.appendChild(s);
-  }else{initGA();}
+function save(){
+  localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
+  clearTimeout(syncTimeout);
+  setSyncUI('saving');
+  syncTimeout=setTimeout(()=>pushData(),1000);
 }
-
-function initGA(){
-  google.accounts.oauth2.initTokenClient({
-    client_id:GCL,
-    scope:'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file',
-    callback:(r)=>{
-      if(r.access_token){
-        aToken=r.access_token;
-        localStorage.setItem('ks_at',aToken);
-        driveOn=true;
-        updateSyncUI(true);
-        closeMo('moSync');
-        loadDrive();
-        toast('Google Drive connected!','s');
-      }
-    }
-  }).requestAccessToken();
-}
-
-function useLocal(){closeMo('moSync');renderClients();renderStatsBar();}
 
 // ── STRIPE ─────────────────────────────────────────────────────────────────────
 function openStripeModal(){if(stripeKey)document.getElementById('skInput').value=stripeKey;document.getElementById('moStripe').classList.add('open');}
@@ -528,6 +444,8 @@ function updateStripeUI(){const b=document.getElementById('sBtn');document.getEl
 function getDaysLeft(c){
   if(c.contractType!=='pif'||!c.startDate)return null;
   const days=parseInt(c.period==='custom'?c.customDays:c.period)||90;
+  // If ads off, use the frozen days left
+  if(c.adsOff&&c.adsPausedDaysLeft!==undefined)return c.adsPausedDaysLeft;
   return Math.ceil((new Date(c.startDate).getTime()+days*86400000-Date.now())/86400000);
 }
 function getPct(c){return Math.min(100,Math.round(((parseInt(c.current)||0)/(parseInt(c.target)||1))*100));}
@@ -543,22 +461,22 @@ function checkInvoiceTrigger(c){
 }
 function getAutoStatus(c){
   if(c.status&&c.status!=='auto')return c.status;
-  const current=parseInt(c.current)||0;
-  const target=parseInt(c.target)||0;
+  // If ads are off, freeze status
+  if(c.adsOff&&c.adsPausedStatus)return c.adsPausedStatus;
+  const current=parseInt(c.current)||0,target=parseInt(c.target)||0;
   if(!target)return'on-track';
   const bookingPct=Math.min(100,(current/target)*100);
   if(c.contractType==='pif'&&c.startDate){
     const totalDays=parseInt(c.period==='custom'?c.customDays:c.period)||90;
-    const elapsed=totalDays-Math.max(0,getDaysLeft(c)||0);
+    const dl=getDaysLeft(c);
+    const elapsed=totalDays-Math.max(0,dl||0);
     const timePct=Math.min(100,(elapsed/totalDays)*100);
     const gap=timePct-bookingPct;
     if(gap>25)return'red';if(gap>10)return'amber';return'on-track';
   }else if(c.contractType==='ppa'&&c.ppaStartDate&&c.monthlyTarget){
-    // PPA with monthly target — check if on pace
     const monthlyTarget=parseInt(c.monthlyTarget)||0;
     const start=new Date(c.ppaStartDate);
-    const now=new Date();
-    const monthsElapsed=Math.max(0.1,(now-start)/(1000*60*60*24*30.44));
+    const monthsElapsed=Math.max(0.1,(Date.now()-start)/(1000*60*60*24*30.44));
     const expectedByNow=monthlyTarget*monthsElapsed;
     const gap=expectedByNow-current;
     if(gap>monthlyTarget*0.5)return'red';
@@ -567,6 +485,25 @@ function getAutoStatus(c){
   }else{
     if(bookingPct>=75)return'on-track';if(bookingPct>=40)return'amber';return'red';
   }
+}
+
+// ── ADS TOGGLE ─────────────────────────────────────────────────────────────────
+function toggleAds(id){
+  const c=clients.find(x=>x.id===id);if(!c)return;
+  if(c.adsOff){
+    // Turn ads back on
+    c.adsOff=false;
+    c.adsPausedDaysLeft=undefined;
+    c.adsPausedStatus=undefined;
+    toast(`${c.company||c.name} — Ads back on`,'s');
+  }else{
+    // Turn ads off — freeze current state
+    c.adsOff=true;
+    c.adsPausedDaysLeft=getDaysLeft(c);
+    c.adsPausedStatus=getAutoStatus(c);
+    toast(`${c.company||c.name} — Ads paused`,'i');
+  }
+  save();renderClients();
 }
 
 // ── STATS BAR ──────────────────────────────────────────────────────────────────
@@ -594,6 +531,7 @@ function getFiltered(){
     if(curFilter==='amber')return getAutoStatus(c)==='amber';
     if(curFilter==='red')return getAutoStatus(c)==='red';
     if(curFilter==='invoice')return c.invState==='needs-send'||c.invState==='waiting';
+    if(curFilter==='ads-off')return c.adsOff;
     return true;
   });
   const sort=document.getElementById('sortSel')?.value||'newest';
@@ -624,12 +562,15 @@ function renderRow(c){
   const ctBadge=isPPA?'<span class="badge badge-ppa">PPA</span>':'<span class="badge badge-pif">PIF</span>';
   const ob=c.onboarding||[];
   const obBadges=[ob.includes('needs')?'<span class="badge badge-ob-needs">📋 Needs Onboarding</span>':'',ob.includes('started')?'<span class="badge badge-ob-started">⚙️ Started</span>':'',ob.includes('live')?'<span class="badge badge-ob-live">🟢 Live</span>':''].join('');
+  const adsBadge=c.adsOff?'<span class="badge badge-ads-off">📵 Ads Off</span>':'';
   const exp=expandedIds.has(c.id);
   const progColor=pct>=100?'fill-gr':pct>=60?'fill-or':'fill-am';
-  const progHtml=`<div class="crow-prog"><div class="prog-label"><span>${pct}%</span><span>${c.current||0}/${c.target||'—'}</span></div><div class="prog-bar"><div class="prog-fill ${progColor}" style="width:${pct}%"></div></div></div>`;
+  const progHtml=`<div class="prog-label"><span>${pct}%</span><span>${c.current||0}/${c.target||'—'}</span></div><div class="prog-bar"><div class="prog-fill ${progColor}" style="width:${pct}%"></div></div>`;
   const dColor=dl!==null&&dl<=7?'var(--re)':dl!==null&&dl<=14?'var(--am)':'var(--tx)';
-  const daysHtml=isPPA?`<div class="crow-stat crow-mid"><div class="crow-stat-val">£${c.perbooking||'—'}</div><div class="crow-stat-label">Per Appt</div></div>`:`<div class="crow-stat crow-mid"><div class="crow-stat-val" style="color:${dColor}">${dl!==null?dl+'d':'—'}</div><div class="crow-stat-label">Days Left</div></div>`;
-  const bookingCtrl=isPPA?`<div class="crow-booking-ctrl" onclick="event.stopPropagation()"><button class="bk-btn bk-minus" onclick="adjBooking('${c.id}',-1)">−</button><div class="bk-count">${c.current||0}</div><button class="bk-btn bk-plus" onclick="adjBooking('${c.id}',1)">+</button></div>`:`<div class="crow-stat crow-mid"><div class="crow-stat-val">${c.current||0}</div><div class="crow-stat-label">Bookings</div></div>`;
+  const daysHtml=isPPA?`<div class="crow-stat"><div class="crow-stat-val">£${c.perbooking||'—'}</div><div class="crow-stat-label">Per Appt</div></div>`:`<div class="crow-stat"><div class="crow-stat-val" style="color:${dColor}">${dl!==null?dl+'d':'—'}</div><div class="crow-stat-label">Days Left${c.adsOff?' ⏸':''}</div></div>`;
+  const bookingCtrl=`<div class="crow-booking-ctrl" onclick="event.stopPropagation()"><button class="bk-btn bk-minus" onclick="adjBooking('${c.id}',-1)">−</button><div class="bk-count">${c.current||0}</div><button class="bk-btn bk-plus" onclick="adjBooking('${c.id}',1)">+</button></div>`;
+
+  // Invoice alert
   let invAlert='';
   if(c.invState==='needs-send'){
     invAlert=`<div class="inv-alert needs-send"><div class="inv-alert-txt">🔔 Invoice ready to send<span>${getInvoiceEvery(c)} bookings · £${c.invamt||'—'}</span></div><div style="display:flex;gap:8px;" onclick="event.stopPropagation()"><button class="btn btn-am btn-sm" onclick="sendInvoice('${c.id}')">Mark Sent ✓</button><button class="btn btn-ghost btn-sm" onclick="dismissInv('${c.id}')">Dismiss</button></div></div>`;
@@ -646,6 +587,11 @@ function renderRow(c){
     const il=inv==='paid'?'✅ Invoice paid':inv==='declined'?'❌ Declined':'⏳ Invoice pending';
     invAlert=`<div class="inv-alert ${ic}"><div class="inv-alert-txt">${il}<span>£${c.totalfee||'—'} · ${c.terms||'—'}</span></div><div onclick="event.stopPropagation()" style="display:flex;gap:6px;">${inv!=='paid'?`<button class="btn btn-gr btn-sm" onclick="setInvPif('${c.id}','paid')">Mark Paid</button>`:''}<button class="btn btn-ghost btn-sm" onclick="setInvPif('${c.id}','unpaid')">Reset</button></div></div>`;
   }
+  if(c.adsOff){
+    invAlert=`<div class="inv-alert ads-paused"><div class="inv-alert-txt" style="color:var(--re);">📵 Ads are off — timeline paused<span>Turn ads back on to resume tracking</span></div></div>`;
+  }
+
+  // Expanded section
   let expandedHtml='';
   if(exp){
     const bookings=c.bookings||[];
@@ -661,7 +607,7 @@ function renderRow(c){
       <div class="erow"><span class="erow-l">Total Fee</span><span class="erow-r">£${c.totalfee||'—'}</span></div>
       <div class="erow"><span class="erow-l">Period</span><span class="erow-r">${c.period==='custom'?c.customDays:c.period} days</span></div>
       <div class="erow"><span class="erow-l">Start Date</span><span class="erow-r">${c.startDate||'—'}</span></div>
-      <div class="erow"><span class="erow-l">Days Left</span><span class="erow-r" style="color:${dColor}">${dl!==null?dl+' days':'—'}</span></div>
+      <div class="erow"><span class="erow-l">Days Left</span><span class="erow-r" style="color:${dColor}">${dl!==null?dl+' days':'—'}${c.adsOff?' (paused)':''}</span></div>
       <div class="erow"><span class="erow-l">Terms</span><span class="erow-r">${c.terms||'—'}</span></div>
       <div class="erow"><span class="erow-l">Invoice</span><span class="erow-r">${c.inv_pif==='paid'?'✅ Paid':c.inv_pif==='declined'?'❌ Declined':'⏳ Pending'}</span></div>`;
     expandedHtml=`<div class="crow-expanded open" onclick="event.stopPropagation()">
@@ -690,18 +636,25 @@ function renderRow(c){
       </div>
     </div>`;
   }
-  return`<div class="client-row ${sc}" onclick="toggleExpand('${c.id}')">
+
+  return`<div class="client-row ${sc}${c.adsOff?' ads-off':''}" onclick="toggleExpand('${c.id}')">
     <div class="crow-main">
       <div>
         <div class="crow-name">${c.company||c.name}</div>
         <div class="crow-company">${c.company?c.name:c.niche||'—'}</div>
-        <div class="crow-badge-wrap">${statusBadge}${ctBadge}${obBadges}${c.stripeId||c.stripeIdPif?'<span class="badge badge-pu">⚡ Stripe</span>':''}</div>
+        <div class="crow-badge-wrap">${statusBadge}${ctBadge}${obBadges}${adsBadge}</div>
       </div>
       ${bookingCtrl}
-      <div class="crow-stat crow-mid"><div class="crow-stat-val">${c.target||'—'}</div><div class="crow-stat-label">Target</div></div>
+      <div class="crow-stat"><div class="crow-stat-val">${c.target||'—'}</div><div class="crow-stat-label">Target</div></div>
       ${daysHtml}
-      <div class="crow-prog crow-mid">${progHtml}</div>
-      <div><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openEdit('${c.id}')">Edit</button></div>
+      <div class="crow-prog">${progHtml}</div>
+      <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;" onclick="event.stopPropagation()">
+        <button class="btn btn-ghost btn-xs" onclick="openEdit('${c.id}')">Edit</button>
+        <div class="ads-toggle ${c.adsOff?'off':''}" onclick="toggleAds('${c.id}')">
+          <span class="ads-tog-dot"></span>
+          <span class="ads-tog-lbl">${c.adsOff?'Ads Off':'Ads On'}</span>
+        </div>
+      </div>
     </div>
     ${invAlert}
     ${expandedHtml}
@@ -808,6 +761,7 @@ function saveClient(){
     invState:ex?.invState||null,invSentDate:ex?.invSentDate||null,
     invPaidDate:ex?.invPaidDate||null,lastInvoiceAt:ex?.lastInvoiceAt||0,
     totalInvoiced:ex?.totalInvoiced||0,
+    adsOff:ex?.adsOff||false,adsPausedDaysLeft:ex?.adsPausedDaysLeft,adsPausedStatus:ex?.adsPausedStatus,
     setup:g('f_setup'),perbooking:g('f_perbooking'),invEvery:g('f_invevery'),
     monthlyTarget:g('f_monthlytarget'),ppaStartDate:g('f_ppa_startdate'),
     invCustom:g('f_invCustom'),invamt:g('f_invamt'),stripeId:g('f_stripe_ppa'),
@@ -820,22 +774,17 @@ function saveClient(){
   save();renderClients();closeMo('moClient');toast(editId?'Client updated':'Client added','s');
 }
 function deleteClient(id){
-  if(!confirm('Delete this client?'))return;
+  if(!confirm('Delete this client? This cannot be undone.'))return;
   clients=clients.filter(c=>c.id!==id);expandedIds.delete(id);
-  save();renderClients();toast('Deleted','i');
+  save();renderClients();toast('Client deleted','i');
 }
 
 // ── DISTANCE ───────────────────────────────────────────────────────────────────
-let distMode='miles';
-let mapsKey=localStorage.getItem('ks_maps')||'';
-function setDistMode(m,el){distMode=m;document.querySelectorAll('.dist-mode-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');const w=document.getElementById('mapsKeyWrap');if(w)w.style.display=m==='time'?'block':'none';document.getElementById('distResults').innerHTML='';}
-function saveMapsKey(){const v=document.getElementById('mapsKeyInput')?.value.trim();if(!v)return;mapsKey=v;localStorage.setItem('ks_maps',v);toast('Maps key saved','s');}
 async function checkDist(){
   const pc=document.getElementById('leadPC').value.trim().toUpperCase();
   const err=document.getElementById('distErr'),res=document.getElementById('distResults');
   if(!pc){err.textContent='Enter a postcode';err.style.display='block';return;}
   err.style.display='none';
-  if(distMode==='time'&&!mapsKey){err.textContent='Add your Google Maps API key above.';err.style.display='block';return;}
   res.innerHTML=`<div style="text-align:center;padding:40px;color:var(--t2);"><span class="sp"></span><div style="margin-top:10px;font-size:12px;">Looking up...</div></div>`;
   let lc;
   try{const r=await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(pc)}`);const d=await r.json();if(d.status!==200)throw new Error();lc={lat:d.result.latitude,lng:d.result.longitude};}
@@ -843,32 +792,28 @@ async function checkDist(){
   if(!clients.length){res.innerHTML='<div class="empty"><div class="empty-icon">📋</div><h3>No clients added yet</h3></div>';return;}
   const wc=await Promise.all(clients.map(async c=>{
     if(!c.postcode)return{...c,dist:null};
-    try{const r=await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(c.postcode)}`);const d=await r.json();if(d.status!==200)return{...c,dist:null};return{...c,lat:d.result.latitude,lng:d.result.longitude,dist:hav(lc.lat,lc.lng,d.result.latitude,d.result.longitude)};}
+    try{const r=await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(c.postcode)}`);const d=await r.json();if(d.status!==200)return{...c,dist:null};return{...c,dist:hav(lc.lat,lc.lng,d.result.latitude,d.result.longitude)};}
     catch(e){return{...c,dist:null};}
   }));
-  if(distMode==='time'){
-    const valid=wc.filter(c=>c.lat!=null);
-    for(let i=0;i<valid.length;i+=10){
-      const batch=valid.slice(i,i+10);
-      const dests=batch.map(c=>`${c.lat},${c.lng}`).join('|');
-      try{const r=await fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${lc.lat},${lc.lng}&destinations=${encodeURIComponent(dests)}&mode=driving&key=${mapsKey}`);const d=await r.json();if(d.status==='OK'&&d.rows[0])d.rows[0].elements.forEach((el,j)=>{if(el.status==='OK'){batch[j].driveSeconds=el.duration.value;batch[j].driveText=el.duration.text;batch[j].distText=el.distance.text;}});}catch(e){}
-    }
-  }
-  const sorted=wc.sort((a,b)=>(distMode==='time'?(a.driveSeconds??99999)-(b.driveSeconds??99999):(a.dist??999)-(b.dist??999)));
+  const sorted=wc.sort((a,b)=>(a.dist??999)-(b.dist??999));
   const inR=sorted.filter(c=>c.dist!==null&&c.radius&&c.dist<=parseFloat(c.radius));
   const outR=sorted.filter(c=>c.dist===null||!c.radius||c.dist>parseFloat(c.radius));
   let html='';
-  if(inR.length)html+=`<div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-bottom:10px;">In Range (${inR.length})</div><div class="dist-grid" style="margin-bottom:20px;">`+inR.map(c=>dCard(c,true)).join('')+'</div>';
+  if(inR.length)html+=`<div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-bottom:10px;">✅ In Range (${inR.length})</div><div class="dist-grid" style="margin-bottom:20px;">`+inR.map(c=>dCard(c,true)).join('')+'</div>';
   if(outR.length)html+=`<div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px;">Out of Range (${outR.length})</div><div class="dist-grid">`+outR.map(c=>dCard(c,false)).join('')+'</div>';
   res.innerHTML=html;
 }
 function dCard(c,inR){
-  const mainVal=distMode==='time'?(c.driveText||'—'):(c.dist!==null?c.dist.toFixed(1)+'mi':'?');
-  const sub=distMode==='time'&&c.distText?c.distText:'';
-  return`<div class="dist-card ${inR?'inr':'outr'}"><div class="dist-ico ${inR?'in':'out'}">${inR?'✅':'❌'}</div><div class="dist-info"><div class="dist-name">${c.company||c.name}</div><div class="dist-detail">${c.postcode} · ${c.radius||'?'}mi radius</div></div><div class="dist-mi ${inR?'in':'out'}" style="font-size:${distMode==='time'?'13':'16'}px;">${mainVal}${sub?`<div style="font-size:9px;font-weight:400;color:var(--t3);">${sub}</div>`:''}</div></div>`;
+  const miles=c.dist!==null?c.dist:null;
+  const mainVal=miles!==null?miles.toFixed(1)+'mi':'?';
+  let estMins=null;
+  if(miles!==null){const mph=miles<2?10:miles<10?25:miles<25?40:55;estMins=Math.round((miles/mph)*60);}
+  const timeStr=estMins!==null?`~${estMins} min${estMins===1?'':'s'}`:'';
+  return`<div class="dist-card ${inR?'inr':'outr'}"><div class="dist-ico ${inR?'in':'out'}">${inR?'✅':'❌'}</div><div class="dist-info"><div class="dist-name">${c.company||c.name}</div><div class="dist-detail">${c.postcode} · ${c.radius||'?'}mi radius</div></div><div class="dist-mi ${inR?'in':'out'}">${mainVal}<div style="font-size:9px;font-weight:400;color:var(--t2);margin-top:2px;">${timeStr}</div></div></div>`;
 }
 function hav(a,b,c,d){const R=3958.8,dl=(c-a)*Math.PI/180,dn=(d-b)*Math.PI/180,x=Math.sin(dl/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dn/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 
+// ── MODALS ─────────────────────────────────────────────────────────────────────
 function closeMo(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
 function toast(m,t='s'){const x=document.getElementById('toast');x.textContent=m;x.className=`toast ${t} show`;setTimeout(()=>x.classList.remove('show'),3000);}
