@@ -177,6 +177,22 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 .toast{position:fixed;bottom:20px;right:20px;background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);padding:10px 15px;font-size:12px;font-weight:600;color:var(--tx);z-index:9999;transform:translateY(60px);opacity:0;transition:all .25s;}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast.s{border-left:3px solid var(--gr);}.toast.e{border-left:3px solid var(--re);}.toast.i{border-left:3px solid var(--or);}
+/* SETTER FILTER BAR */
+.setter-bar{display:flex;align-items:center;gap:8px;padding:10px 24px;background:var(--s1);border-bottom:1px solid var(--b1);flex-wrap:wrap;}
+.setter-bar-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);white-space:nowrap;}
+.setter-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:20px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--t2);}
+.setter-btn:hover{border-color:var(--b2);color:var(--tx);}
+.setter-btn.active{color:#fff;}
+.setter-btn .setter-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.setter-add-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;background:transparent;border:1px dashed var(--b2);border-radius:20px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;cursor:pointer;color:var(--t3);transition:all .2s;text-transform:uppercase;letter-spacing:.05em;}
+.setter-add-btn:hover{border-color:var(--or);color:var(--or);}
+.badge-setter{padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;}
+.setter-list-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border-radius:var(--r2);margin-bottom:6px;}
+.setter-color-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.setter-item-name{flex:1;font-size:13px;font-weight:700;}
+.color-options{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.color-opt{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;}
+.color-opt:hover,.color-opt.sel{border-color:var(--tx);transform:scale(1.15);}
 @media(max-width:900px){.crow-main{grid-template-columns:1fr auto;}.crow-mid{display:none;}.stats-bar{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:600px){.main,.hdr{padding-left:14px;padding-right:14px;}.tabs{padding:0 14px;}.stats-bar{grid-template-columns:1fr 1fr;}.exp-grid{grid-template-columns:1fr;}.controls{flex-direction:column;align-items:stretch;}}
 </style>
@@ -196,6 +212,8 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
   <button class="tab" onclick="switchTab('stats',this)">Monthly Stats</button>
   <button class="tab" onclick="switchTab('distance',this)">Distance Checker</button>
 </div>
+<div class="setter-bar" id="setterBar"></div>
+
 <main class="main">
   <div class="page active" id="page-clients">
     <div class="stats-bar" id="statsBar"></div>
@@ -248,6 +266,23 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
   </div>
 </main>
 <div class="toast" id="toast"></div>
+
+<!-- SETTER MODAL -->
+<div class="mo" id="moSetters">
+  <div class="md" style="max-width:460px;">
+    <button class="md-x" onclick="closeMo('moSetters')">✕</button>
+    <div class="md-title">👥 Manage Setters</div>
+    <div id="setterListUI"></div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--b1);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:8px;">Add New Setter</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input class="fi" id="newSetterName" placeholder="Setter name e.g. Ross" style="flex:1;">
+        <button class="btn btn-or" onclick="addSetter()">Add</button>
+      </div>
+      <div class="color-options" id="newSetterColors"></div>
+    </div>
+  </div>
+</div>
 
 <!-- STRIPE MODAL -->
 <div class="mo" id="moStripe">
@@ -337,6 +372,10 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
         </div>
       </div>
       <div class="fsec">Notes</div>
+      <div class="fgrp full">
+        <label class="fl">Assigned Setters</label>
+        <div id="setterAssignWrap" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;"></div>
+      </div>
       <div class="fgrp full"><label class="fl">Setter Briefing Notes</label><textarea class="fta" id="f_notes" style="min-height:80px;" placeholder="Background, key contacts, what to mention on calls..."></textarea></div>
       <div class="factions">
         <button class="btn btn-ghost" onclick="closeMo('moClient')">Cancel</button>
@@ -352,9 +391,12 @@ const BIN_ID='6a637a25da38895dfe8a3dcd';
 const BIN_KEY='$2a$10$YAbo2.HJNndQmvqMS4Mwku5n/e99ppqzoffguUQRHDuCF1iar6jlK';
 const BIN_URL=`https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
+const SETTER_COLORS=['#ff6a00','#4ade80','#a78bfa','#f59e0b','#60a5fa','#f472b6','#34d399','#fb923c'];
+
 // ── STATE ──────────────────────────────────────────────────────────────────────
-let clients=[],editId=null,curContract='ppa',curFilter='all';
+let clients=[],setters=[],editId=null,curContract='ppa',curFilter='all',curSetter='all';
 let stripeKey=null,expandedIds=new Set(),syncTimeout=null,isSaving=false;
+let newSetterColor=SETTER_COLORS[0],selectedSetterIds=[];
 
 window.addEventListener('load',()=>{
   stripeKey=localStorage.getItem('ks_sk')||null;
@@ -384,23 +426,22 @@ function setSyncUI(state){
 
 async function loadData(silent=false){
   if(!silent)setSyncUI('loading');
-  // Load local first for instant render
-  try{const raw=localStorage.getItem('ks_d');if(raw){const p=JSON.parse(raw);clients=p.clients||[];}}catch(e){clients=[];}
-  if(!silent){renderClients();renderStatsBar();}
-  // Fetch from JSONBin
+  try{const raw=localStorage.getItem('ks_d');if(raw){const p=JSON.parse(raw);clients=p.clients||[];setters=p.setters||[];}}catch(e){clients=[];setters=[];}
+  if(setters.length===0)setters=[{id:'s1',name:'Jay',color:'#ff6a00'},{id:'s2',name:'Ross',color:'#4ade80'},{id:'s3',name:'Harvey',color:'#a78bfa'}];
+  if(!silent){renderClients();renderStatsBar();renderSetterBar();}
   try{
     const r=await fetch(`${BIN_URL}/latest`,{headers:{'X-Master-Key':BIN_KEY,'X-Bin-Meta':false}});
     if(!r.ok)throw new Error('fetch failed');
     const d=await r.json();
     const binClients=d.clients||[];
-    // Use whichever has more — prevents overwriting newer data
+    const binSetters=d.setters||[];
     if(binClients.length>0){
-      // Compare by last updated timestamp if available
       const localUpdated=parseInt(localStorage.getItem('ks_updated')||'0');
       const binUpdated=d.updated||0;
       if(binUpdated>=localUpdated||binClients.length>clients.length){
         clients=binClients;
-        localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
+        if(binSetters.length>0)setters=binSetters;
+        localStorage.setItem('ks_d',JSON.stringify({clients,setters,v:3}));
         localStorage.setItem('ks_updated',String(binUpdated));
       }else if(clients.length>binClients.length){
         await pushData();return;
@@ -410,17 +451,17 @@ async function loadData(silent=false){
     }
     setSyncUI('ok');
   }catch(e){setSyncUI('err');}
-  renderClients();renderStatsBar();
+  renderClients();renderStatsBar();renderSetterBar();
 }
 
 async function pushData(){
   isSaving=true;setSyncUI('saving');
   try{
     const now=Date.now();
-    const data={clients,v:3,updated:now};
+    const data={clients,setters,v:3,updated:now};
     const r=await fetch(BIN_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':BIN_KEY},body:JSON.stringify(data)});
     if(!r.ok)throw new Error('push failed');
-    localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
+    localStorage.setItem('ks_d',JSON.stringify({clients,setters,v:3}));
     localStorage.setItem('ks_updated',String(now));
     setSyncUI('ok');
   }catch(e){setSyncUI('err');}
@@ -428,7 +469,7 @@ async function pushData(){
 }
 
 function save(){
-  localStorage.setItem('ks_d',JSON.stringify({clients,v:3}));
+  localStorage.setItem('ks_d',JSON.stringify({clients,setters,v:3}));
   clearTimeout(syncTimeout);
   setSyncUI('saving');
   syncTimeout=setTimeout(()=>pushData(),1000);
@@ -506,7 +547,88 @@ function toggleAds(id){
   save();renderClients();
 }
 
-// ── STATS BAR ──────────────────────────────────────────────────────────────────
+// ── SETTERS ─────────────────────────────────────────────────────────────────────
+function renderSetterBar(){
+  const bar=document.getElementById('setterBar');
+  const allBtn=`<button class="setter-btn ${curSetter==='all'?'active':''}" style="${curSetter==='all'?'background:var(--or);border-color:var(--or);':''}" onclick="setSetter('all')">All Clients</button>`;
+  const setterBtns=setters.map(s=>`<button class="setter-btn ${curSetter===s.id?'active':''}" style="${curSetter===s.id?`background:${s.color};border-color:${s.color};`:'border-color:'+s.color+';'}" onclick="setSetter('${s.id}')"><span class="setter-dot" style="background:${s.color};"></span>${s.name}</button>`).join('');
+  bar.innerHTML=`<span class="setter-bar-label">View:</span>${allBtn}${setterBtns}<button class="setter-add-btn" onclick="openSetterModal()">+ Manage Setters</button>`;
+}
+
+function setSetter(id){curSetter=id;renderSetterBar();renderClients();}
+
+function openSetterModal(){
+  renderSetterModalUI();
+  renderColorPicker('newSetterColors',newSetterColor,(c)=>{newSetterColor=c;});
+  document.getElementById('moSetters').classList.add('open');
+}
+
+function renderSetterModalUI(){
+  const list=document.getElementById('setterListUI');
+  list.innerHTML=setters.map(s=>`
+    <div class="setter-list-item">
+      <div class="setter-color-dot" style="background:${s.color};"></div>
+      <div class="setter-item-name">${s.name}</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-xs" onclick="renameSetter('${s.id}')">Rename</button>
+        <button class="btn btn-re btn-xs" onclick="deleteSetter('${s.id}')">Remove</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderColorPicker(containerId,selected,onSelect){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  el.innerHTML=SETTER_COLORS.map(c=>`<div class="color-opt ${c===selected?'sel':''}" style="background:${c};" onclick="selectColor('${containerId}','${c}',this)"></div>`).join('');
+  el._onSelect=onSelect;
+}
+
+function selectColor(containerId,color,el){
+  document.querySelectorAll(`#${containerId} .color-opt`).forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel');
+  const container=document.getElementById(containerId);
+  if(container._onSelect)container._onSelect(color);
+}
+
+function addSetter(){
+  const name=document.getElementById('newSetterName').value.trim();
+  if(!name){toast('Enter a name','e');return;}
+  setters.push({id:'s'+Date.now(),name,color:newSetterColor});
+  document.getElementById('newSetterName').value='';
+  save();renderSetterBar();renderSetterModalUI();toast(name+' added','s');
+}
+
+function renameSetter(id){
+  const s=setters.find(x=>x.id===id);if(!s)return;
+  const name=prompt('New name for '+s.name+':',s.name);
+  if(!name||!name.trim())return;
+  s.name=name.trim();save();renderSetterBar();renderSetterModalUI();
+}
+
+function deleteSetter(id){
+  if(!confirm('Remove this setter?'))return;
+  setters=setters.filter(s=>s.id!==id);
+  clients.forEach(c=>{if(c.assignedSetters)c.assignedSetters=c.assignedSetters.filter(x=>x!==id);});
+  if(curSetter===id)curSetter='all';
+  save();renderSetterBar();renderSetterModalUI();renderClients();
+}
+
+function renderSetterAssign(){
+  const wrap=document.getElementById('setterAssignWrap');if(!wrap)return;
+  wrap.innerHTML=setters.map(s=>`
+    <div onclick="toggleSetterAssign('${s.id}')" style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid ${selectedSetterIds.includes(s.id)?s.color:' var(--b1)'};background:${selectedSetterIds.includes(s.id)?s.color+'22':'var(--s2)'};cursor:pointer;transition:all .2s;">
+      <span style="width:7px;height:7px;border-radius:50%;background:${s.color};display:inline-block;"></span>
+      <span style="font-size:11px;font-weight:700;color:${selectedSetterIds.includes(s.id)?s.color:'var(--t2)'};">${s.name}</span>
+    </div>`).join('');
+}
+
+function toggleSetterAssign(id){
+  if(selectedSetterIds.includes(id))selectedSetterIds=selectedSetterIds.filter(x=>x!==id);
+  else selectedSetterIds.push(id);
+  renderSetterAssign();
+}
+
+
 function renderStatsBar(){
   const total=clients.length;
   const totalBooks=clients.reduce((a,c)=>(a+(parseInt(c.current)||0)),0);
@@ -534,6 +656,7 @@ function getFiltered(){
     if(curFilter==='ads-off')return c.adsOff;
     return true;
   });
+  if(curSetter!=='all')list=list.filter(c=>(c.assignedSetters||[]).includes(curSetter));
   const sort=document.getElementById('sortSel')?.value||'newest';
   if(sort==='newest')list.sort((a,b)=>parseInt(b.id)-parseInt(a.id));
   else if(sort==='oldest')list.sort((a,b)=>parseInt(a.id)-parseInt(b.id));
@@ -563,6 +686,7 @@ function renderRow(c){
   const ob=c.onboarding||[];
   const obBadges=[ob.includes('needs')?'<span class="badge badge-ob-needs">📋 Needs Onboarding</span>':'',ob.includes('started')?'<span class="badge badge-ob-started">⚙️ Started</span>':'',ob.includes('live')?'<span class="badge badge-ob-live">🟢 Live</span>':''].join('');
   const adsBadge=c.adsOff?'<span class="badge badge-ads-off">📵 Ads Off</span>':'';
+  const setterBadges=(c.assignedSetters||[]).map(sid=>{const s=setters.find(x=>x.id===sid);return s?`<span class="badge-setter" style="background:${s.color}22;color:${s.color};border:1px solid ${s.color}44;">${s.name}</span>`:''}).join('');
   const exp=expandedIds.has(c.id);
   const progColor=pct>=100?'fill-gr':pct>=60?'fill-or':'fill-am';
   const progHtml=`<div class="prog-label"><span>${pct}%</span><span>${c.current||0}/${c.target||'—'}</span></div><div class="prog-bar"><div class="prog-fill ${progColor}" style="width:${pct}%"></div></div>`;
@@ -642,7 +766,7 @@ function renderRow(c){
       <div>
         <div class="crow-name">${c.company||c.name}</div>
         <div class="crow-company">${c.company?c.name:c.niche||'—'}</div>
-        <div class="crow-badge-wrap">${statusBadge}${ctBadge}${obBadges}${adsBadge}</div>
+        <div class="crow-badge-wrap">${statusBadge}${ctBadge}${obBadges}${adsBadge}${setterBadges}</div>
       </div>
       ${bookingCtrl}
       <div class="crow-stat"><div class="crow-stat-val">${c.target||'—'}</div><div class="crow-stat-label">Target</div></div>
@@ -714,8 +838,8 @@ function renderStats(){
 }
 
 // ── ADD / EDIT ─────────────────────────────────────────────────────────────────
-function openAdd(){editId=null;document.getElementById('moClientTitle').textContent='Add New Client';clearForm();selContract('ppa');document.getElementById('moClient').classList.add('open');}
-function openEdit(id){const c=clients.find(x=>x.id===id);if(!c)return;editId=id;document.getElementById('moClientTitle').textContent='Edit Client';fillForm(c);document.getElementById('moClient').classList.add('open');}
+function openAdd(){editId=null;document.getElementById('moClientTitle').textContent='Add New Client';clearForm();selContract('ppa');renderSetterAssign();document.getElementById('moClient').classList.add('open');}
+function openEdit(id){const c=clients.find(x=>x.id===id);if(!c)return;editId=id;document.getElementById('moClientTitle').textContent='Edit Client';fillForm(c);renderSetterAssign();document.getElementById('moClient').classList.add('open');}
 function clearForm(){
   ['f_name','f_company','f_niche','f_postcode','f_radius','f_target','f_current','f_prefs','f_setup','f_perbooking','f_monthlytarget','f_ppa_startdate','f_invamt','f_stripe_ppa','f_totalfee','f_customdays','f_startdate','f_stripe_pif','f_notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=id==='f_current'?'0':'';});
   document.getElementById('f_status').value='auto';
@@ -726,13 +850,17 @@ function clearForm(){
   document.getElementById('f_inv_pif').value='unpaid';
   document.getElementById('f_invCW').style.display='none';
   document.getElementById('f_cdw').style.display='none';
+  selectedSetterIds=[];
   ['needs','started','live'].forEach(k=>document.getElementById('ob-'+k)?.classList.remove('sel'));
+  renderSetterAssign();
 }
 function fillForm(c){
   clearForm();
   const s=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined&&v!==null)el.value=v;};
   s('f_name',c.name);s('f_company',c.company);s('f_niche',c.niche);s('f_postcode',c.postcode);s('f_radius',c.radius);s('f_status',c.status||'auto');s('f_target',c.target);s('f_current',c.current||0);s('f_prefs',c.prefs);s('f_notes',c.notes);
   (c.onboarding||[]).forEach(k=>document.getElementById('ob-'+k)?.classList.add('sel'));
+  selectedSetterIds=[...(c.assignedSetters||[])];
+  renderSetterAssign();
   selContract(c.contractType||'ppa');
   if(c.contractType==='ppa'){s('f_setup',c.setup);s('f_perbooking',c.perbooking);s('f_monthlytarget',c.monthlyTarget);s('f_ppa_startdate',c.ppaStartDate);s('f_invevery',c.invEvery||'5');s('f_invamt',c.invamt);s('f_stripe_ppa',c.stripeId);if(c.invEvery==='custom'){document.getElementById('f_invCW').style.display='flex';s('f_invCustom',c.invCustom);}}
   else{s('f_totalfee',c.totalfee);s('f_period',c.period);s('f_customdays',c.customDays);s('f_startdate',c.startDate);s('f_terms',c.terms);s('f_renewal',c.renewal);s('f_inv_pif',c.inv_pif);s('f_stripe_pif',c.stripeIdPif);if(c.period==='custom')document.getElementById('f_cdw').style.display='block';}
@@ -758,6 +886,7 @@ function saveClient(){
     status:g('f_status'),target:g('f_target'),current:g('f_current'),
     prefs:g('f_prefs'),notes:g('f_notes'),onboarding,
     contractType:curContract,bookings:ex?.bookings||[],
+    assignedSetters:[...selectedSetterIds],
     invState:ex?.invState||null,invSentDate:ex?.invSentDate||null,
     invPaidDate:ex?.invPaidDate||null,lastInvoiceAt:ex?.lastInvoiceAt||0,
     totalInvoiced:ex?.totalInvoiced||0,
