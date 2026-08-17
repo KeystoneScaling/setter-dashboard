@@ -387,9 +387,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--tx);min-heig
 
 <script>
 // ── CONFIG ─────────────────────────────────────────────────────────────────────
-const BIN_ID='6a637a25da38895dfe8a3dcd';
-const BIN_KEY='$2a$10$YAbo2.HJNndQmvqMS4Mwku5n/e99ppqzoffguUQRHDuCF1iar6jlK';
-const BIN_URL=`https://api.jsonbin.io/v3/b/${BIN_ID}`;
+const FB_URL='https://keystonedashboard-default-rtdb.firebaseio.com/data.json';
 
 const SETTER_COLORS=['#ff6a00','#4ade80','#a78bfa','#f59e0b','#60a5fa','#f472b6','#34d399','#fb923c'];
 
@@ -402,7 +400,6 @@ window.addEventListener('load',()=>{
   stripeKey=localStorage.getItem('ks_sk')||null;
   updateStripeUI();
   loadData();
-  // Auto-refresh every 30 seconds to pick up changes from other devices
   setInterval(()=>{if(!isSaving)loadData(true);},30000);
 });
 
@@ -414,7 +411,7 @@ function switchTab(t,el){
   if(t==='stats')renderStats();
 }
 
-// ── JSONBIN SYNC ───────────────────────────────────────────────────────────────
+// ── FIREBASE SYNC ──────────────────────────────────────────────────────────────
 function setSyncUI(state){
   const dot=document.getElementById('syncDot');
   const lbl=document.getElementById('syncLbl');
@@ -430,27 +427,27 @@ async function loadData(silent=false){
   if(setters.length===0)setters=[{id:'s1',name:'Jay',color:'#ff6a00'},{id:'s2',name:'Ross',color:'#4ade80'},{id:'s3',name:'Harvey',color:'#a78bfa'}];
   if(!silent){renderClients();renderStatsBar();renderSetterBar();}
   try{
-    const r=await fetch(`${BIN_URL}/latest`,{headers:{'X-Master-Key':BIN_KEY,'X-Bin-Meta':false}});
-    if(!r.ok)throw new Error('fetch failed');
+    const r=await fetch(FB_URL);
+    if(!r.ok)throw new Error('load failed '+r.status);
     const d=await r.json();
-    const binClients=d.clients||[];
-    const binSetters=d.setters||[];
-    if(binClients.length>0){
+    if(d&&d.clients){
+      const fbClients=d.clients||[];
+      const fbSetters=d.setters||[];
       const localUpdated=parseInt(localStorage.getItem('ks_updated')||'0');
-      const binUpdated=d.updated||0;
-      if(binUpdated>=localUpdated||binClients.length>clients.length){
-        clients=binClients;
-        if(binSetters.length>0)setters=binSetters;
+      const fbUpdated=d.updated||0;
+      if(fbUpdated>=localUpdated||fbClients.length>clients.length){
+        clients=fbClients;
+        if(fbSetters.length>0)setters=fbSetters;
         localStorage.setItem('ks_d',JSON.stringify({clients,setters,v:3}));
-        localStorage.setItem('ks_updated',String(binUpdated));
-      }else if(clients.length>binClients.length){
+        localStorage.setItem('ks_updated',String(fbUpdated));
+      }else if(clients.length>fbClients.length){
         await pushData();return;
       }
     }else if(clients.length>0){
       await pushData();return;
     }
     setSyncUI('ok');
-  }catch(e){setSyncUI('err');}
+  }catch(e){console.error('Firebase load error:',e);setSyncUI('err');}
   renderClients();renderStatsBar();renderSetterBar();
 }
 
@@ -459,12 +456,12 @@ async function pushData(){
   try{
     const now=Date.now();
     const data={clients,setters,v:3,updated:now};
-    const r=await fetch(BIN_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':BIN_KEY},body:JSON.stringify(data)});
-    if(!r.ok)throw new Error('push failed');
+    const r=await fetch(FB_URL,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    if(!r.ok)throw new Error('push failed '+r.status);
     localStorage.setItem('ks_d',JSON.stringify({clients,setters,v:3}));
     localStorage.setItem('ks_updated',String(now));
     setSyncUI('ok');
-  }catch(e){setSyncUI('err');}
+  }catch(e){console.error('Firebase push error:',e);setSyncUI('err');}
   isSaving=false;
 }
 
